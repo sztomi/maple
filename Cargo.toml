@@ -1,0 +1,32 @@
+[package]
+name = "maple"
+version = "0.1.0"
+authors = ["Tamás Szelei <szelei.t@gmail.com>"]
+edition = "2018"
+
+[features]
+opengl = ["imgui-gfx-renderer/opengl"]
+directx = ["imgui-gfx-renderer/directx"]
+default = ["opengl"]
+
+[dependencies]
+serde = { version = "1.0.114", features = ["derive"] }
+serde_json = "1.0.56"
+anyhow = "1.0.31"
+reqwest = { version = "0.10.6", features = ["json"] }
+tokio = { version = "0.2.21", features = ["rt-core", "rt-threaded", "macros", "net"] }
+webbrowser = "0.5.4"
+tokio-timer = "0.2.13"
+imgui-gfx-renderer = "0.4.0"
+imgui-winit-support = { version = "0.4.0", default-features = false, features = ["winit-19"] }
+gfx = "0.18"
+gfx_device_gl = "0.16"
+gfx_window_glutin = "0.31"
+glutin = "0.21"
+image = "0.23"
+imgui = "0.4.0"
+
+
+[target.'cfg(windows)'.dev-dependencies]
+gfx_device_dx11 = "0.8"
+gfx_window_dxgi = "0.19"
