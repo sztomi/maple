@@ -8,7 +8,7 @@ pub enum LoginState {
 }
 
 pub struct App {
-  login_state: LoginState,
+  pub login_state: LoginState,
 }
 
 pub type SharedApp = Arc<Mutex<App>>;
@@ -16,7 +16,7 @@ pub type SharedApp = Arc<Mutex<App>>;
 impl App {
   pub fn new(login_state: LoginState) -> Self {
     Self {
-      login_state: login_state,
+      login_state,
     }
   }
 }

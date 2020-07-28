@@ -1,15 +1,16 @@
 use std::sync::mpsc::Sender;
 
+use anyhow::Result;
+use log::error;
+
 use crate::ui::scaffolding;
 use crate::network::NetworkEvent;
 use crate::appstate::SharedApp;
 
-use anyhow::Result;
 
-#[macro_use]
 use imgui::*;
 
-pub fn run_ui<'a>(app: &'a SharedApp, tx: &Sender<NetworkEvent>) -> Result<()> {
+pub fn run_ui<'a>(_app: &'a SharedApp, tx: &Sender<NetworkEvent>) -> Result<()> {
   let window_title = im_str!("Maple for Plex");
   let system = scaffolding::init(&window_title.to_string());
   let window_size = system.render_sys.window().get_inner_size().unwrap();
@@ -24,9 +25,10 @@ pub fn run_ui<'a>(app: &'a SharedApp, tx: &Sender<NetworkEvent>) -> Result<()> {
       .build(ui, || {
         ui.text(format!("FPS: {}", ui.io().framerate));
         if ui.button(im_str!("Log in"), [80.0, 20.0]) {
-          tx.send(NetworkEvent::Login);
+          if let Err(err) = tx.send(NetworkEvent::Login) {
+            error!("Login failed: {:?}", err)
+          }
         }
-        ()
       });
   });
   Ok(())

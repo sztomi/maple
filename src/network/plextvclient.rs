@@ -4,8 +4,7 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use reqwest::header;
 use serde::de::DeserializeOwned;
 use anyhow::Result;
-use webbrowser;
-use tokio::time;
+use log::info;
 
 
 use crate::network::types::*;
@@ -18,12 +17,21 @@ pub struct PlexTvClient {
   client: reqwest::Client
 }
 
+fn create_default_headers(token: Option<String>) -> Result<HeaderMap> {
+  let mut headers = HeaderMap::new();
+  headers.insert(header::CONTENT_TYPE, HeaderValue::from_static("application/x-www-form-urlencoded"));
+  headers.insert(header::ACCEPT, HeaderValue::from_static("application/json"));
+  headers.insert("X-Plex-Client-Identifier", "6".parse().unwrap());
+  headers.insert("X-Plex-Product", HeaderValue::from_static("Maple for Plex"));
+  if let Some(tk) = token {
+    headers.insert("X-Plex-Token", HeaderValue::from_str(&tk)?);
+  }
+  Ok(headers)
+}
+
 impl PlexTvClient {
   pub fn new(base_url: &'static str) -> Result<Self> {
-    let mut headers = HeaderMap::new();
-    headers.insert(header::CONTENT_TYPE, HeaderValue::from_static("application/x-www-form-urlencoded"));
-    headers.insert(header::ACCEPT, HeaderValue::from_static("application/json"));
-    headers.insert("X-Plex-Client-Identifier", "6".parse().unwrap());
+    let headers = create_default_headers(None)?;
 
     Ok(Self {
       base_url: base_url.to_owned(),
@@ -32,7 +40,7 @@ impl PlexTvClient {
     })
   }
 
-  pub async fn get_auth_token(&self) -> Result<()> {
+  pub async fn get_auth_token(&mut self) -> Result<()> {
     let resp = self.post::<CreatePinResponse>("/api/v2/pins?strong=true").await?;
     let auth_url = format!("{}/auth#?clientID=6&code={}", APP_PLEXTV, resp.code);
 
@@ -42,10 +50,15 @@ impl PlexTvClient {
           let pinf = self.get::<PinInfo>(&pin_try_url).await?;
           tokio::time::delay_for(Duration::from_millis(1000)).await;
           if let Some(token) = pinf.auth_token {
-            println!("GOT TOKEN: {}", token);
+            info!("Received plex.tv token");
+            self.token = Some(token.clone());
+            let headers = create_default_headers(Some(token))?;
+            self.client = reqwest::Client::builder().default_headers(headers).build()?;
             break;
           }
       }
+    }
+    else {
     }
 
     Ok(())

@@ -1,4 +1,5 @@
 mod types;
+#[allow(clippy::module_inception)]
 mod network;
 
 pub mod plextvclient;
