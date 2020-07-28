@@ -12,8 +12,11 @@ use imgui::*;
 
 pub fn run_ui<'a>(_app: &'a SharedApp, tx: &Sender<NetworkEvent>) -> Result<()> {
   let window_title = im_str!("Maple for Plex");
-  let system = scaffolding::init(&window_title.to_string());
+  let mut system = scaffolding::init(&window_title.to_string());
   let window_size = system.render_sys.window().get_inner_size().unwrap();
+
+  let style = system.imgui.style_mut();
+  style.window_rounding = 0.0;
 
   system.main_loop(move |_, ui| {
     Window::new(window_title)
