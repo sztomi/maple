@@ -1,9 +1,10 @@
 use std::sync::mpsc::{channel, Receiver};
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use std::thread;
 
 use anyhow::Result;
 use log::{info, error};
+use tokio::sync::Mutex;
 
 mod network;
 mod appstate;
