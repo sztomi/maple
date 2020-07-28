@@ -1,5 +1,5 @@
 use anyhow::Result;
-use log::info;
+use log::{info, error};
 
 use crate::appstate::{SharedApp, LoginState};
 use crate::network::plextvclient::PlexTvClient;
@@ -28,9 +28,22 @@ impl<'a> Network<'a> {
     match event {
       NetworkEvent::Login => {
         info!("Login requested.");
-        let mut app = self.app.lock().unwrap();
-        app.login_state = LoginState::LoggingIn;
-        self.plextv.get_auth_token().await
+        {
+          let mut app = self.app.lock().await;
+          app.login_state = LoginState::LoggingIn;
+        }
+        match self.plextv.get_auth_token().await {
+          Ok(_) => {
+            let mut app = self.app.lock().await;
+            app.login_state = LoginState::LoggedIn;
+          },
+          Err(err) => {
+            error!("Could not get plex.tv auth token: {:?}", err);
+            let mut app = self.app.lock().await;
+            app.login_state = LoginState::Error;
+          }
+        }
+        Ok(())
       }
     }
   }
