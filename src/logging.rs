@@ -1,7 +1,9 @@
 use log::debug;
 use fern::colors::{Color, ColoredLevelConfig};
+use qmetaobject;
 
-pub fn set_up_logging() {
+
+pub fn setup_logging() {
   let colors_line = ColoredLevelConfig::new()
     .error(Color::Red)
     .warn(Color::Yellow);
@@ -23,5 +25,6 @@ pub fn set_up_logging() {
     .apply()
     .unwrap();
 
+  qmetaobject::init_qt_to_rust();
   debug!("Logging setup finished");
 }

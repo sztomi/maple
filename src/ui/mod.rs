@@ -1,5 +1,3 @@
-mod render;
+mod qt;
 
-pub mod scaffolding;
-
-pub use render::run_ui;
+pub use qt::run_ui;
