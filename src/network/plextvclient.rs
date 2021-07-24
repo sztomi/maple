@@ -9,6 +9,7 @@ use serde::de::DeserializeOwned;
 use crate::network::types::*;
 
 const APP_PLEXTV: &str = "https://app.plex.tv";
+const CLIENT_ID: &str = "Maple_1_0";
 
 type QueryParams<'a> = Vec<(&'a str, &'a str)>;
 
@@ -25,7 +26,7 @@ fn create_default_headers(token: Option<String>) -> Result<HeaderMap> {
     HeaderValue::from_static("application/x-www-form-urlencoded"),
   );
   headers.insert(header::ACCEPT, HeaderValue::from_static("application/json"));
-  headers.insert("X-Plex-Client-Identifier", "6".parse().unwrap());
+  headers.insert("X-Plex-Client-Identifier", HeaderValue::from_static(CLIENT_ID));
   headers.insert("X-Plex-Product", HeaderValue::from_static("Maple for Plex"));
   if let Some(tk) = token {
     headers.insert("X-Plex-Token", HeaderValue::from_str(&tk)?);
@@ -50,7 +51,7 @@ impl PlexTvClient {
     let resp = self
       .post::<CreatePinResponse>("/api/v2/pins?strong=true")
       .await?;
-    let auth_url = format!("{}/auth#?clientID=6&code={}", APP_PLEXTV, resp.code);
+    let auth_url = format!("{}/auth#?clientID={}&code={}", APP_PLEXTV, CLIENT_ID, resp.code);
 
     if webbrowser::open(&auth_url).is_ok() {
       loop {
