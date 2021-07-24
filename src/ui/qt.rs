@@ -12,6 +12,9 @@ qrc!(qml_resources_init,
   "" {
       "qml/main.qml",
       "qml/mpv.qml",
+      "qml/elements/Button.qml",
+      "qml/elements/Style.qml",
+      "qml/elements/qmldir",
   },
 );
 
@@ -26,7 +29,7 @@ cpp! {{
 struct Dispatcher {
   tx: Sender<NetworkEvent>,
   base: qt_base_class!(trait QObject),
-  beginLogin: qt_method!(fn(&self)),
+  begin_login: qt_method!(fn(&self)),
 }
 
 impl Dispatcher {
@@ -34,7 +37,7 @@ impl Dispatcher {
     Self {
       tx,
       base: Default::default(),
-      beginLogin: Default::default()
+      begin_login: Default::default()
     }
   }
 
@@ -54,7 +57,7 @@ pub fn run_ui<'a>(_app: &'a SharedApp, tx: Sender<NetworkEvent>) -> Result<()> {
   let mut engine = QmlEngine::new();
   let dispatcher = QObjectBox::new(Dispatcher::new(tx));
   engine.set_object_property("dispatcher".into(), dispatcher.pinned());
-  engine.load_file("qrc:/qml/mpv.qml".into());
+  engine.load_file("qrc:/qml/main.qml".into());
   engine.exec();
   Ok(())
 }

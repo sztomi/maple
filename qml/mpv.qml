@@ -22,7 +22,7 @@ Window {
             MouseArea {
                 anchors.fill: parent
                 // onClicked: renderer.command(["loadfile", "test.mkv"])
-                onClicked: dispatcher.beginLogin()
+                onClicked: dispatcher.begin_login()
             }
         }
 
