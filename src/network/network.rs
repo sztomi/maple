@@ -1,5 +1,5 @@
 use anyhow::Result;
-use log::{info, error};
+use log;
 
 use crate::appstate::{SharedApp, LoginState};
 use crate::network::plextvclient::PlexTvClient;
@@ -13,6 +13,7 @@ pub struct Network<'a> {
 
 #[derive(Debug)]
 pub enum NetworkEvent {
+  Startup,
   Login,
 }
 
@@ -26,8 +27,16 @@ impl<'a> Network<'a> {
 
   pub async fn handle_network_event(&mut self, event: &NetworkEvent) -> Result<()> {
     match event {
+      NetworkEvent::Startup => {
+        if self.plextv.has_token() {
+          log::debug!("plex.tv client using cached token.");
+          let mut app = self.app.lock().await;
+          app.login_state = LoginState::LoggedIn;
+        }
+        Ok(())
+      },
       NetworkEvent::Login => {
-        info!("Login requested.");
+        log::info!("Login requested.");
         {
           let mut app = self.app.lock().await;
           app.login_state = LoginState::LoggingIn;
@@ -38,7 +47,7 @@ impl<'a> Network<'a> {
             app.login_state = LoginState::LoggedIn;
           },
           Err(err) => {
-            error!("Could not get plex.tv auth token: {:?}", err);
+            log::error!("Could not get plex.tv auth token: {:?}", err);
             let mut app = self.app.lock().await;
             app.login_state = LoginState::Error;
           }

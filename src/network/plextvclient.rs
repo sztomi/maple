@@ -41,14 +41,21 @@ impl PlexTvClient {
 
     Ok(Self {
       base_url: base_url.to_owned(),
-      token: None,
+      token: config::get("plextv", "token")?,
       client: reqwest::Client::builder()
         .default_headers(headers)
         .build()?,
     })
   }
 
+  pub fn has_token(&self) -> bool {
+    self.token.is_some()
+  }
+
   pub async fn get_auth_token(&mut self) -> Result<()> {
+    if self.token.is_some() {
+      log::debug!("Getting new token despite a cached one existing.");
+    }
     let resp = self
       .post::<CreatePinResponse>("/api/v2/pins?strong=true")
       .await?;
@@ -62,7 +69,7 @@ impl PlexTvClient {
         if let Some(token) = pinf.auth_token {
           info!("Received plex.tv token");
           self.token = Some(token.clone());
-          config::set("plextv", "token", &token);
+          config::set("plextv", "token", &token)?;
           let headers = create_default_headers(Some(token))?;
           self.client = reqwest::Client::builder()
             .default_headers(headers)

@@ -48,6 +48,7 @@ impl Dispatcher {
 }
 
 pub fn run_ui<'a>(_app: &'a SharedApp, tx: Sender<NetworkEvent>) -> Result<()> {
+  tx.send(NetworkEvent::Startup)?;
   qml_resources_init();
   unsafe {
     cpp!([] -> () as "void" {
