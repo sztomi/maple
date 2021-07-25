@@ -12,7 +12,7 @@ pub fn setup_logging() {
   fern::Dispatch::new()
     .format(move |out, message, record| {
       out.finish(format_args!(
-        "{level:5} {date} {target:30} {message}",
+        "{level:5} {date} {target:35} {message}",
         date = chrono::Local::now().format("%y-%m-%d %H:%M:%S%.f"),
         target = record.target(),
         level = colors_level.color(record.level()),
