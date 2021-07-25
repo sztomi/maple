@@ -1,3 +1,4 @@
 edition = "2018"
 tab_spaces = 2
 max_width = 100
+control_brace_style = "ClosingNextLine"
