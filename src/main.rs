@@ -10,6 +10,7 @@ mod network;
 mod appstate;
 mod ui;
 mod logging;
+mod config;
 
 use network::{Network, NetworkEvent};
 use appstate::{App, LoginState};

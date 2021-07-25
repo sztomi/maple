@@ -7,6 +7,7 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::de::DeserializeOwned;
 
 use crate::network::types::*;
+use crate::config;
 
 const APP_PLEXTV: &str = "https://app.plex.tv";
 const CLIENT_ID: &str = "Maple_1_0";
@@ -61,6 +62,7 @@ impl PlexTvClient {
         if let Some(token) = pinf.auth_token {
           info!("Received plex.tv token");
           self.token = Some(token.clone());
+          config::set("plextv", "token", &token);
           let headers = create_default_headers(Some(token))?;
           self.client = reqwest::Client::builder()
             .default_headers(headers)
