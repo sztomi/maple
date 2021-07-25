@@ -3,7 +3,7 @@ use std::sync::Arc;
 use std::thread;
 
 use anyhow::Result;
-use log::{info, error};
+use log;
 use tokio::sync::Mutex;
 
 mod network;
@@ -16,12 +16,17 @@ use network::{Network, NetworkEvent};
 use appstate::{App, LoginState};
 use ui::run_ui;
 use logging::setup_logging;
+use config::ensure_config_file;
 
 
 
 fn main() -> Result<()> {
   setup_logging();
-  info!("Maple for Plex starting");
+  log::info!("Maple for Plex starting");
+
+  if let Ok(cfg_file) = ensure_config_file() {
+    log::info!("Using config file: {}", cfg_file.display());
+  }
 
   // this architecture is largely based on https://keliris.dev/improving-spotify-tui/ (<3)
   let app = Arc::new(Mutex::new(App::new(LoginState::LoggedOut)));
@@ -40,7 +45,7 @@ fn main() -> Result<()> {
 async fn start_network<'a>(rx: Receiver<NetworkEvent>, network: &mut Network) {
   while let Ok(event) = rx.recv() {
     if let Err(err) = network.handle_network_event(&event).await {
-      error!("Could not handle event {:?}: {}", event, err);
+      log::error!("Could not handle event {:?}: {}", event, err);
     }
   }
 }
