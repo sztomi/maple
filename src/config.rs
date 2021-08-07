@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 use std::path::PathBuf;
 
-use anyhow::{ensure, Result};
+use anyhow::Result;
 use configparser;
 use directories::ProjectDirs;
 use log;
