@@ -32,6 +32,9 @@ impl<'a> Network<'a> {
           log::debug!("plex.tv client using cached token.");
           let mut app = self.app.lock().await;
           app.login_state = LoginState::LoggedIn;
+          self.plextv.reset_headers();
+          let user = self.plextv.get_user().await.unwrap();
+          println!("{:?}", user);
         }
         Ok(())
       },
