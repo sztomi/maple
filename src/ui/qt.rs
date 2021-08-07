@@ -1,6 +1,7 @@
 use std::sync::mpsc::Sender;
+use std::stringify;
 
-use anyhow::{Error, Result};
+use anyhow::Result;
 use cpp::cpp;
 use qmetaobject::prelude::*;
 use log;
@@ -10,11 +11,11 @@ use crate::network::NetworkEvent;
 
 qrc!(qml_resources_init,
   "" {
-      "qml/main.qml",
-      "qml/mpv.qml",
-      "qml/elements/Button.qml",
-      "qml/elements/Style.qml",
-      "qml/elements/qmldir",
+      "src/qml/main.qml",
+      "src/qml/mpv.qml",
+      "src/qml/elements/Button.qml",
+      "src/qml/elements/Style.qml",
+      "src/qml/elements/qmldir",
   },
 );
 
@@ -32,6 +33,17 @@ struct Dispatcher {
   begin_login: qt_method!(fn(&self)),
 }
 
+macro_rules! event_sender {
+  ($func:ident -> $event:ident) => {
+    fn $func(&self) {
+      log::trace!("Sending NetworkEvent::{}", stringify!($event));
+      if let Err(err) = self.tx.send(NetworkEvent::$event) {
+        log::error!("Could not send internal event {}: {}", stringify!($event), err);
+      }
+    }
+  };
+}
+
 impl Dispatcher {
   fn new(tx: Sender<NetworkEvent>) -> Self {
     Self {
@@ -41,10 +53,7 @@ impl Dispatcher {
     }
   }
 
-  fn begin_login(&self) {
-    log::trace!("beginLogin called");
-    self.tx.send(NetworkEvent::Login);
-  }
+  event_sender! { begin_login -> Login }
 }
 
 pub fn run_ui<'a>(_app: &'a SharedApp, tx: Sender<NetworkEvent>) -> Result<()> {
@@ -58,7 +67,7 @@ pub fn run_ui<'a>(_app: &'a SharedApp, tx: Sender<NetworkEvent>) -> Result<()> {
   let mut engine = QmlEngine::new();
   let dispatcher = QObjectBox::new(Dispatcher::new(tx));
   engine.set_object_property("dispatcher".into(), dispatcher.pinned());
-  engine.load_file("qrc:/qml/main.qml".into());
+  engine.load_file("qrc:/src/qml/main.qml".into());
   engine.exec();
   Ok(())
 }
