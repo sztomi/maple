@@ -20,6 +20,8 @@ pub fn setup_logging() {
       ));
     })
     .level(log::LevelFilter::Error)
+    // "default" is the category that the qmetaobject log integration sets by default
+    .level_for("default", log::LevelFilter::Trace)
     .level_for("maple", log::LevelFilter::Trace)
     .chain(std::io::stdout())
     .apply()
