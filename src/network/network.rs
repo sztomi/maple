@@ -30,7 +30,7 @@ impl<'a> Network<'a> {
       NetworkEvent::Startup => {
         if self.plextv.has_token() {
           log::debug!("plex.tv client using cached token.");
-          let mut app = self.app.lock().await;
+          let mut app = self.app.lock().unwrap();
           app.login_state = LoginState::LoggedIn;
           self.plextv.reset_headers();
           let user = self.plextv.get_user().await.unwrap();
@@ -41,17 +41,17 @@ impl<'a> Network<'a> {
       NetworkEvent::Login => {
         log::info!("Login requested.");
         {
-          let mut app = self.app.lock().await;
+          let mut app = self.app.lock().unwrap();
           app.login_state = LoginState::LoggingIn;
         }
         match self.plextv.get_auth_token().await {
           Ok(_) => {
-            let mut app = self.app.lock().await;
+            let mut app = self.app.lock().unwrap();
             app.login_state = LoginState::LoggedIn;
           },
           Err(err) => {
             log::error!("Could not get plex.tv auth token: {:?}", err);
-            let mut app = self.app.lock().await;
+            let mut app = self.app.lock().unwrap();
             app.login_state = LoginState::Error;
           }
         }

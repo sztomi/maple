@@ -1,5 +1,4 @@
-use std::sync::Arc;
-use tokio::sync::Mutex;
+use std::sync::{Arc, Mutex};
 use qmetaobject::QEnum;
 
 
