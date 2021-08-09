@@ -5,7 +5,7 @@ use cpp::cpp;
 use qmetaobject::prelude::*;
 use log;
 
-use crate::appstate::{SharedApp, LoginState};
+use crate::appstate::{SharedApp, AppState};
 use crate::network::NetworkEvent;
 use super::dispatcher::Dispatcher;
 

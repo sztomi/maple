@@ -1,7 +1,7 @@
 use anyhow::Result;
 use log;
 
-use crate::appstate::{SharedApp, LoginState};
+use crate::appstate::{SharedApp, AppState};
 use crate::network::plextvclient::PlexTvClient;
 
 const PLEX_TV_URL: &str = "https://plex.tv";
@@ -31,7 +31,7 @@ impl<'a> Network<'a> {
         if self.plextv.has_token() {
           log::debug!("plex.tv client using cached token.");
           let mut app = self.app.lock().unwrap();
-          app.login_state = LoginState::LoggedIn;
+          app.app_state = AppState::LoggedIn;
           self.plextv.reset_headers();
           let user = self.plextv.get_user().await.unwrap();
           println!("{:?}", user);
@@ -42,17 +42,17 @@ impl<'a> Network<'a> {
         log::info!("Login requested.");
         {
           let mut app = self.app.lock().unwrap();
-          app.login_state = LoginState::LoggingIn;
+          app.app_state = AppState::LoggingIn;
         }
         match self.plextv.get_auth_token().await {
           Ok(_) => {
             let mut app = self.app.lock().unwrap();
-            app.login_state = LoginState::LoggedIn;
+            app.app_state = AppState::LoggedIn;
           },
           Err(err) => {
             log::error!("Could not get plex.tv auth token: {:?}", err);
             let mut app = self.app.lock().unwrap();
-            app.login_state = LoginState::Error;
+            app.app_state = AppState::Error;
           }
         }
         Ok(())

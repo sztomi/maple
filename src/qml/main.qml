@@ -20,7 +20,7 @@ ApplicationWindow {
   }
 
   Component.onCompleted: {
-    if (dispatcher.get_login_state() == LoginState.LoggedIn) {
+    if (dispatcher.get_app_state() == AppState.LoggedIn) {
       Functions.createView("MainView.qml", stack)
     }
     else {

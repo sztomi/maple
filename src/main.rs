@@ -12,7 +12,7 @@ mod logging;
 mod config;
 
 use network::{Network, NetworkEvent};
-use appstate::{App, LoginState};
+use appstate::{App, AppState};
 use ui::run_ui;
 use logging::setup_logging;
 use config::ensure_config_file;
@@ -28,7 +28,7 @@ fn main() -> Result<()> {
   }
 
   // this architecture is largely based on https://keliris.dev/improving-spotify-tui/ (<3)
-  let app = Arc::new(Mutex::new(App::new(LoginState::LoggedOut)));
+  let app = Arc::new(Mutex::new(App::new(AppState::LoggedOut)));
   let cloned_app = Arc::clone(&app);
   let (tx, rx) = channel::<NetworkEvent>();
 

@@ -5,7 +5,7 @@ use qmetaobject::QEnum;
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 #[derive(QEnum)]
 #[repr(i32)]
-pub enum LoginState {
+pub enum AppState {
   LoggedOut = 0,
   LoggingIn = 1,
   LoggedIn = 2,
@@ -13,15 +13,15 @@ pub enum LoginState {
 }
 
 pub struct App {
-  pub login_state: LoginState,
+  pub app_state: AppState,
 }
 
 pub type SharedApp = Arc<Mutex<App>>;
 
 impl App {
-  pub fn new(login_state: LoginState) -> Self {
+  pub fn new(app_state: AppState) -> Self {
     Self {
-      login_state,
+      app_state,
     }
   }
 }
