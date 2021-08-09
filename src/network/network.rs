@@ -34,7 +34,6 @@ impl<'a> Network<'a> {
           app.app_state = AppState::LoggedIn;
           self.plextv.reset_headers();
           let user = self.plextv.get_user().await.unwrap();
-          println!("{:?}", user);
         }
         Ok(())
       },
