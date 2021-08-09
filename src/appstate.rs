@@ -1,11 +1,16 @@
 use std::sync::Arc;
 use tokio::sync::Mutex;
+use qmetaobject::QEnum;
 
+
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(QEnum)]
+#[repr(i32)]
 pub enum LoginState {
-  LoggedOut,
-  LoggingIn,
-  LoggedIn,
-  Error
+  LoggedOut = 0,
+  LoggingIn = 1,
+  LoggedIn = 2,
+  Error = -1,
 }
 
 pub struct App {
