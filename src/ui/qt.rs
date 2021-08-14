@@ -18,7 +18,6 @@ qrc!(qml_resources_init,
       "src/qml/elements/qmldir",
       "src/qml/views/LoginView.qml",
       "src/qml/views/MainView.qml",
-      "src/qml/views/createView.js",
       "src/qml/views/qmldir",
   },
 );

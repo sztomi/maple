@@ -4,7 +4,6 @@ import QtQuick.Controls 2.15
 import "views" as Views
 import "elements" as Maple
 import MapleNative 1.0
-import "views/createView.js" as Functions
 
 ApplicationWindow {
   id: appWindow
@@ -14,17 +13,22 @@ ApplicationWindow {
   title: qsTr("Maple for Plex")
   color: Maple.Style.colors.richBlack
 
+  Loader {
+    id: currentView
+  }
+
   StackView {
     id: stack
     anchors.centerIn: parent
+    initialItem: currentView
   }
 
   Component.onCompleted: {
     if (dispatcher.get_app_state() == AppState.LoggedIn) {
-      Functions.createView("MainView.qml", stack)
+      currentView.source = "views/MainView.qml"
     }
     else {
-      Functions.createView("LoginView.qml", stack)
+      currentView.source = "views/LoginView.qml"
     }
   }
 }
