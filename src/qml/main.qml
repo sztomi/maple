@@ -19,7 +19,7 @@ ApplicationWindow {
 
   StackView {
     id: stack
-    anchors.centerIn: parent
+    anchors.fill: parent
     initialItem: currentView
   }
 
