@@ -6,7 +6,7 @@ use qmetaobject::prelude::*;
 use log;
 
 use crate::appstate::{SharedApp, AppState};
-use crate::network::NetworkEvent;
+use crate::client::NetworkEvent;
 use super::dispatcher::Dispatcher;
 
 qrc!(qml_resources_init,

@@ -5,13 +5,13 @@ use std::thread;
 use anyhow::Result;
 use log;
 
-mod network;
+mod client;
 mod appstate;
 mod ui;
 mod logging;
 mod config;
 
-use network::{Network, NetworkEvent};
+use client::{Client, ClientEvent};
 use appstate::{App, AppState};
 use ui::run_ui;
 use logging::setup_logging;
@@ -30,20 +30,20 @@ fn main() -> Result<()> {
   // this architecture is largely based on https://keliris.dev/improving-spotify-tui/ (<3)
   let app = Arc::new(Mutex::new(App::new(AppState::LoggedOut)));
   let cloned_app = Arc::clone(&app);
-  let (tx, rx) = channel::<NetworkEvent>();
+  let (tx, rx) = channel::<ClientEvent>();
 
   thread::spawn(move || {
-    let mut network = Network::new(&app).unwrap();
-    start_network(rx, &mut network);
+    let mut client = Client::new(&app).unwrap();
+    start_client(rx, &mut client);
   });
 
   run_ui(&cloned_app, tx)
 }
 
 #[tokio::main]
-async fn start_network<'a>(rx: Receiver<NetworkEvent>, network: &mut Network) {
+async fn start_client<'a>(rx: Receiver<ClientEvent>, client: &mut Client) {
   while let Ok(event) = rx.recv() {
-    if let Err(err) = network.handle_network_event(&event).await {
+    if let Err(err) = client.handle_client_event(&event).await {
       log::error!("Could not handle event {:?}: {}", event, err);
     }
   }

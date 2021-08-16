@@ -2,22 +2,22 @@ use anyhow::Result;
 use log;
 
 use crate::appstate::{SharedApp, AppState};
-use crate::network::plextvclient::PlexTvClient;
+use crate::client::plextvclient::PlexTvClient;
 
 const PLEX_TV_URL: &str = "https://plex.tv";
 
-pub struct Network<'a> {
+pub struct Client<'a> {
   app: &'a SharedApp,
   plextv: PlexTvClient,
 }
 
 #[derive(Debug)]
-pub enum NetworkEvent {
+pub enum ClientEvent {
   Startup,
   Login,
 }
 
-impl<'a> Network<'a> {
+impl<'a> Client<'a> {
   pub fn new(app: &'a SharedApp) -> Result<Self> {
     Ok(Self {
       app,
@@ -25,9 +25,9 @@ impl<'a> Network<'a> {
     })
   }
 
-  pub async fn handle_network_event(&mut self, event: &NetworkEvent) -> Result<()> {
+  pub async fn handle_client_event(&mut self, event: &ClientEvent) -> Result<()> {
     match event {
-      NetworkEvent::Startup => {
+      ClientEvent::Startup => {
         if self.plextv.has_token() {
           log::debug!("plex.tv client using cached token.");
           let mut app = self.app.lock().unwrap();
@@ -37,7 +37,7 @@ impl<'a> Network<'a> {
         }
         Ok(())
       },
-      NetworkEvent::Login => {
+      ClientEvent::Login => {
         log::info!("Login requested.");
         {
           let mut app = self.app.lock().unwrap();

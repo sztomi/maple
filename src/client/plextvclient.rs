@@ -8,7 +8,7 @@ use serde::de::DeserializeOwned;
 use thiserror::Error;
 
 use crate::config;
-use crate::network::types::*;
+use crate::client::types::*;
 
 const APP_PLEXTV: &str = "https://app.plex.tv";
 const CLIENT_ID: &str = "Maple_1_0";
