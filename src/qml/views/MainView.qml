@@ -11,7 +11,7 @@ Item {
   Rectangle {
     id: leftMenu
     width: 260
-    height: parent.height
+    height: parent.height - topbar.height
     anchors.left: parent.left
     anchors.top: topbar.bottom
     color: Maple.Style.colors.white
@@ -23,7 +23,7 @@ Item {
     anchors.left: leftMenu.right
     anchors.right: parent.right
     anchors.bottom: parent.bottom
-    color: Maple.Style.colors.sandyBrown
+    color: "#aaa"
   }
 
   Rectangle {

@@ -7,14 +7,9 @@ pub struct PlexTvError {
   pub message: String,
   pub status: u32,
 }
-
-#[derive(Deserialize, Debug)]
-#[serde(untagged)]
-pub enum PlexTvResponse<T> {
-  Response(T),
-  Error {
-    errors: Vec<PlexTvError>,
-  }
+#[derive(Deserialize, Debug, Default)]
+pub struct PlexTvErrors {
+  pub errors: Vec<PlexTvError>
 }
 
 #[derive(Deserialize, Debug, Default)]

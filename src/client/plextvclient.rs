@@ -7,8 +7,8 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 
-use crate::config;
 use crate::client::types::*;
+use crate::config;
 
 const APP_PLEXTV: &str = "https://app.plex.tv";
 const CLIENT_ID: &str = "Maple_1_0";
@@ -24,7 +24,7 @@ pub struct PlexTvClient {
 #[derive(Error, Debug)]
 enum RequestError {
   #[error("plex.tv returned one or more errors")]
-  Error(Vec<PlexTvError>),
+  Error(PlexTvErrors),
   #[error("Error while sending request")]
   SendError(reqwest::Error),
   #[error("Deserialization failed.")]
@@ -152,24 +152,35 @@ impl PlexTvClient {
       .await
       .map_err(|e| RequestError::SendError(e))?;
 
+    let status = resp.status();
     let resp_text = resp.text().await?;
 
-    let deser_result = serde_json::from_str::<PlexTvResponse<T>>(&resp_text);
+    if !status.is_success() {
+      let deser_errs = serde_json::from_str::<PlexTvErrors>(&resp_text);
+      match deser_errs {
+        Ok(errors) => {
+          for err in errors.errors.iter() {
+            log::error!("Error from {}: {:?}", path, err);
+          }
+          bail!(RequestError::Error(errors));
+        }
+        Err(_) => {
+          log::error!(
+            "Could not deserialize error response. Text was: {}",
+            resp_text
+          );
+          bail!("ugh");
+        }
+      }
+    }
 
+    let deser_result = serde_json::from_str::<T>(&resp_text);
     match deser_result {
+      Ok(val) => Ok(val),
       Err(err) => {
         log::trace!("Could not decode json: {}", resp_text);
         bail!(err);
       }
-      Ok(val) => match val {
-        PlexTvResponse::Response(res) => Ok(res),
-        PlexTvResponse::Error { errors } => {
-          for err in errors.iter() {
-            log::error!("Error response from {}: {:?}", path, err);
-          }
-          bail!(RequestError::Error(errors))
-        }
-      },
     }
   }
 

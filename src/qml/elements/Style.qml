@@ -5,7 +5,7 @@ import QtQml 2.2
 QtObject {
   property int textSize: 20
   property QtObject colors: QtObject {
-    property color white: "#fff"
+    property color white: "#ddd"
     property color charcoal: "#264653"
     property color persianGreen: "#2A9D8F"
     property color orangeYellowCrayola: "#E9C46A"
@@ -14,4 +14,10 @@ QtObject {
     property color blueMunsell: "#1B9AAA"
     property color richBlack: "#050505"
   }
+  property font headerFont: Qt.font({
+    family: 'Encode Sans',
+    weight: Font.Black,
+    italic: false,
+    pointSize: 24
+  })
 }

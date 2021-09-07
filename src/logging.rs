@@ -19,7 +19,7 @@ pub fn setup_logging() {
         message = message,
       ));
     })
-    .level(log::LevelFilter::Error)
+    .level(log::LevelFilter::Info)
     // "default" is the category that the qmetaobject log integration sets by default
     .level_for("default", log::LevelFilter::Debug)
     .level_for("qml", log::LevelFilter::Debug)
