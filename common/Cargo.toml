@@ -1,0 +1,15 @@
+[package]
+name = "common"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.54"
+chrono = "0.4.19"
+configparser = "3.0.0"
+directories = "4.0.1"
+fern = { version = "0.6.0", features = ["colored"] }
+log = "0.4.14"
+thiserror = "1.0.30"

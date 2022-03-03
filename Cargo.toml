@@ -1,29 +1,6 @@
-[package]
-name = "maple"
-version = "0.1.0"
-authors = ["Tamás Szelei <szelei.t@gmail.com>"]
-edition = "2018"
-
-[dependencies]
-anyhow = "1.0.31"
-chrono = "0.4.13"
-configparser = "2.1.0"
-cpp = "0.5.6"
-cstr = "0.2.8"
-directories = "3.0.2"
-fern = { version = "0.6.0", features = ["colored"] }
-lazy_static = "1.4.0"
-log = "0.4.11"
-qmetaobject = "0.2.2"
-qttypes = { version = "0.2.2", features = ["qtquick", "required"] }
-reqwest = { version = "0.10.6", features = ["json"] }
-serde = { version = "1.0.114", features = ["derive"] }
-serde_json = "1.0.56"
-thiserror = "1.0.26"
-tokio = { version = "0.2.21", features = ["rt-core", "rt-threaded", "macros", "net"] }
-tokio-timer = "0.2.13"
-webbrowser = "0.5.4"
-
-[build-dependencies]
-cpp_build = "0.5.6"
-semver = "1.0.3"
+[workspace]
+members = [
+  "common",
+  "maple",
+  "plextvapi"
+]

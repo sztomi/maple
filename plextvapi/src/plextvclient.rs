@@ -7,8 +7,8 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::de::DeserializeOwned;
 use thiserror::Error;
 
-use crate::client::types::*;
-use crate::config;
+use crate::types::*;
+use common::config;
 
 const APP_PLEXTV: &str = "https://app.plex.tv";
 const CLIENT_ID: &str = "Maple_1_0";
@@ -90,24 +90,24 @@ impl PlexTvClient {
       APP_PLEXTV, CLIENT_ID, resp.code
     );
 
-    if webbrowser::open(&auth_url).is_ok() {
-      loop {
-        let pin_try_url = format!("/api/v2/pins/{}", resp.id);
-        let pinf = self.get::<PinInfo>(&pin_try_url, None).await?;
-        tokio::time::delay_for(Duration::from_millis(1000)).await;
-        if let Some(token) = pinf.auth_token {
-          info!("Received plex.tv token");
-          self.token = Some(token.clone());
-          config::set("plextv", "token", &token)?;
-          let headers = create_default_headers(Some(token))?;
-          self.client = reqwest::Client::builder()
-            .default_headers(headers)
-            .build()?;
-          break;
-        }
-      }
-    } else {
-    }
+    // if webbrowser::open(&auth_url).is_ok() {
+    //   loop {
+    //     let pin_try_url = format!("/api/v2/pins/{}", resp.id);
+    //     let pinf = self.get::<PinInfo>(&pin_try_url, None).await?;
+    //     tokio::time::delay_for(Duration::from_millis(1000)).await;
+    //     if let Some(token) = pinf.auth_token {
+    //       info!("Received plex.tv token");
+    //       self.token = Some(token.clone());
+    //       config::set("plextv", "token", &token)?;
+    //       let headers = create_default_headers(Some(token))?;
+    //       self.client = reqwest::Client::builder()
+    //         .default_headers(headers)
+    //         .build()?;
+    //       break;
+    //     }
+    //   }
+    // } else {
+    // }
 
     Ok(())
   }

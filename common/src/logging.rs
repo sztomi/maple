@@ -1,6 +1,5 @@
 use log::debug;
 use fern::colors::{Color, ColoredLevelConfig};
-use qmetaobject;
 
 
 pub fn setup_logging() {
@@ -20,14 +19,10 @@ pub fn setup_logging() {
       ));
     })
     .level(log::LevelFilter::Info)
-    // "default" is the category that the qmetaobject log integration sets by default
-    .level_for("default", log::LevelFilter::Debug)
-    .level_for("qml", log::LevelFilter::Debug)
     .level_for("maple", log::LevelFilter::Trace)
     .chain(std::io::stdout())
     .apply()
     .unwrap();
 
-  qmetaobject::init_qt_to_rust();
   debug!("Logging setup finished");
 }
