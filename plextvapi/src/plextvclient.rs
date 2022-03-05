@@ -1,7 +1,4 @@
-use std::time::Duration;
-
 use anyhow::{bail, Result};
-use log::info;
 use reqwest::header;
 use reqwest::header::{HeaderMap, HeaderValue};
 use serde::de::DeserializeOwned;
@@ -78,48 +75,82 @@ impl PlexTvClient {
     Ok(())
   }
 
-  pub async fn get_auth_token(&mut self) -> Result<()> {
+  /// Creates a pin that can be used for authentication.
+  ///
+  /// # Arguments
+  ///
+  /// * `strong`: when false, it will return a 4-letter code to be entered by humans
+  ///
+  /// # How to obtain a plex.tv token
+  ///
+  /// After receiving a PIN, the user has to be presented with a plex.tv authentication challenge.
+  /// On devices that support it, this should be a browser window that navigates to plex.tv
+  /// for authenticating. On other devices, a link code should be displayed and the user
+  /// asked to visit plex.tv/link
+  ///
+  /// After that, the client should periodically (e.g. every 1-2 seconds) call try_pin until it
+  /// succeeds or a certain number of tries are exhausted.
+  ///
+  /// One way to implement that with a browser is the following snippet:
+  ///
+  /// ```
+  /// let pin = client.create_pin().await?;
+  /// let auth_url = client.get_auth_url(&pin);
+  /// let mut tries = 0;
+  /// let token: Option<String> = None;
+  ///
+  /// if webbrowser::open(&auth_url).is_ok() {
+  ///   loop {
+  ///     tries += 1;
+  ///     let pinf = client.try_pin(&pin).await?;
+  ///     tokio::time::delay_for(Duration::from_millis(1000)).await;
+  ///     if let Some(token) = pinf.auth_token {
+  ///       token = Some(token.clone()); // success
+  ///       break;
+  ///     }
+  ///     if tries > MAX_TRIES {
+  ///       break; // failed to get a token after exhausting tries
+  ///     }
+  ///   }
+  /// ```
+  pub async fn create_pin(&mut self, strong: bool) -> Result<CreatePinResponse> {
     if self.token.is_some() {
       log::debug!("Getting new token despite a cached one existing.");
     }
     let resp = self
-      .post::<CreatePinResponse>("/api/v2/pins?strong=true")
+      .post::<CreatePinResponse>(&format!("/api/v2/pins?strong={}", strong))
       .await?;
-    let auth_url = format!(
-      "{}/auth#?clientID={}&code={}",
-      APP_PLEXTV, CLIENT_ID, resp.code
-    );
-
-    // if webbrowser::open(&auth_url).is_ok() {
-    //   loop {
-    //     let pin_try_url = format!("/api/v2/pins/{}", resp.id);
-    //     let pinf = self.get::<PinInfo>(&pin_try_url, None).await?;
-    //     tokio::time::delay_for(Duration::from_millis(1000)).await;
-    //     if let Some(token) = pinf.auth_token {
-    //       info!("Received plex.tv token");
-    //       self.token = Some(token.clone());
-    //       config::set("plextv", "token", &token)?;
-    //       let headers = create_default_headers(Some(token))?;
-    //       self.client = reqwest::Client::builder()
-    //         .default_headers(headers)
-    //         .build()?;
-    //       break;
-    //     }
-    //   }
-    // } else {
-    // }
-
-    Ok(())
+    Ok(resp)
   }
 
-  pub async fn get_resources(&self) -> Result<Vec<Resource>> {
+  pub fn get_auth_url(&self, pin: &CreatePinResponse) -> String {
+    format!(
+      "{}/auth#?clientID={}&code={}",
+      APP_PLEXTV, CLIENT_ID, pin.code
+    )
+    .to_string()
+  }
+
+  pub async fn try_pin(&self, pin: &CreatePinResponse) -> Result<PinInfo> {
+    self
+      .get::<PinInfo>(&format!("/api/v2/pins/{}", pin.id), None)
+      .await
+  }
+
+  pub async fn get_resources(
+    &self,
+    include_https: bool,
+    include_relay: bool,
+    include_ipv6: bool,
+  ) -> Result<Vec<Resource>> {
+    use common::conversion::bool_to_num;
     let resources = self
       .get::<Vec<Resource>>(
         "/api/v2/resources",
         Some(vec![
-          ("includeHttps", "1"),
-          ("includeRelay", "1"),
-          ("includeIPv6", "1"),
+          ("includeHttps", &bool_to_num(include_https).to_string()),
+          ("includeRelay", &bool_to_num(include_relay).to_string()),
+          ("includeIPv6", &bool_to_num(include_ipv6).to_string()),
         ]),
       )
       .await?;
