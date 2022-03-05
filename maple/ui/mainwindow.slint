@@ -1,0 +1,24 @@
+
+import { DefaultStyle } from "./common.slint";
+
+import { Button } from "widgets/button.slint";
+
+MainWindow := Window {
+  callback quit();
+
+  width: 1024px;
+  height: 576px;
+  title: "Maple for Plex";
+  background: DefaultStyle.background;
+  HorizontalLayout {
+    alignment: center;
+    VerticalLayout {
+      alignment: center;
+      Button {
+        text: "Login";
+      }
+    }
+  }
+  //default-font-family: "Noto Sans";
+  //default-font-size: DefaultStyle.base-font-size;
+}

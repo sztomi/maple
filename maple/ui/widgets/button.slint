@@ -1,0 +1,30 @@
+import { DefaultStyle } from "../common.slint";
+
+export global Button := Rectangle {
+  callback clicked <=> touch.clicked;
+  property <string> text: "Button";
+  property <bool> enabled: true;
+
+  width: 192px;
+  height: 48px;
+  border-radius: 6px;
+  clip: true;
+
+  background: !enabled ? DefaultStyle.disabled
+    : touch.pressed ? DefaultStyle.highlightDarker
+    : touch.has-hover ? DefaultStyle.highlight
+    : DefaultStyle.accent;
+
+  Text {
+    width: parent.width;
+    height: parent.height;
+    text: root.text;
+    color: #ddd;
+    font-size: 18px;
+    vertical-alignment: center;
+    horizontal-alignment: center;
+  }
+
+  touch := TouchArea { }
+
+}
