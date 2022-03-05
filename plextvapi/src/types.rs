@@ -1,6 +1,5 @@
 use serde::Deserialize;
 
-
 #[derive(Deserialize, Debug, Default)]
 pub struct PlexTvError {
   pub code: u32,
@@ -9,7 +8,7 @@ pub struct PlexTvError {
 }
 #[derive(Deserialize, Debug, Default)]
 pub struct PlexTvErrors {
-  pub errors: Vec<PlexTvError>
+  pub errors: Vec<PlexTvError>,
 }
 
 #[derive(Deserialize, Debug, Default)]

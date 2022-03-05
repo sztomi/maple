@@ -1,2 +1,2 @@
-pub mod types;
 pub mod plextvclient;
+pub mod types;

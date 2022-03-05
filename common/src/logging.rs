@@ -1,6 +1,5 @@
-use log::debug;
 use fern::colors::{Color, ColoredLevelConfig};
-
+use log::debug;
 
 pub fn setup_logging() {
   let colors_line = ColoredLevelConfig::new()
