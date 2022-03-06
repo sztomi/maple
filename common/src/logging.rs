@@ -19,6 +19,7 @@ pub fn setup_logging() {
     })
     .level(log::LevelFilter::Info)
     .level_for("maple", log::LevelFilter::Trace)
+    .level_for("plextvapi::plextvclient", log::LevelFilter::Trace)
     .chain(std::io::stdout())
     .apply()
     .unwrap();

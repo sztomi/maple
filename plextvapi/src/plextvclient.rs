@@ -7,7 +7,8 @@ use thiserror::Error;
 use crate::types::*;
 use common::config;
 
-const APP_PLEXTV: &str = "https://app.plex.tv";
+pub const PLEXTV: &str = "https://plex.tv";
+pub const APP_PLEXTV: &str = "https://app.plex.tv";
 const CLIENT_ID: &str = "Maple_1_0";
 
 type QueryParams<'a> = Vec<(&'a str, &'a str)>;
@@ -174,6 +175,7 @@ impl PlexTvClient {
     params: Option<QueryParams<'_>>,
   ) -> Result<T> {
     let req_addr = format!("{}/{}", &self.base_url, path);
+    log::trace!("GET {}", req_addr);
     let mut builder = self.client.get(&req_addr);
     if let Some(params) = params {
       builder = builder.query(&params);
@@ -217,7 +219,42 @@ impl PlexTvClient {
 
   async fn post<T: DeserializeOwned>(&self, path: &str) -> Result<T> {
     let req_addr = format!("{}/{}", &self.base_url, path);
-    let res: T = self.client.post(&req_addr).send().await?.json().await?;
-    Ok(res)
+    log::trace!("POST {}", req_addr);
+    let mut builder = self.client.post(&req_addr);
+    let resp = builder
+      .send()
+      .await
+      .map_err(|e| RequestError::SendError(e))?;
+
+    let status = resp.status();
+    let resp_text = resp.text().await?;
+
+    if !status.is_success() {
+      let deser_errs = serde_json::from_str::<PlexTvErrors>(&resp_text);
+      match deser_errs {
+        Ok(errors) => {
+          for err in errors.errors.iter() {
+            log::error!("Error from {}: {:?}", path, err);
+          }
+          bail!(RequestError::Error(errors));
+        }
+        Err(_) => {
+          log::error!(
+            "Could not deserialize error response. Text was: {}",
+            resp_text
+          );
+          bail!("ugh");
+        }
+      }
+    }
+
+    let deser_result = serde_json::from_str::<T>(&resp_text);
+    match deser_result {
+      Ok(val) => Ok(val),
+      Err(err) => {
+        log::trace!("Could not decode json: {}", resp_text);
+        bail!(err);
+      }
+    }
   }
 }
