@@ -1,25 +1,27 @@
 
-import { DefaultStyle } from "./common.slint";
-
-import { Button } from "widgets/button.slint";
+import { LoginScreen } from "screens/login.slint";
+import { MainScreen } from "screens/main.slint";
 
 MainWindow := Window {
   callback quit();
-  callback login_clicked <=> btnLogin.clicked;
+  callback login_clicked();
+  property <int> selected-screen: 0;
 
+  title: "Maple for Plex";
   width: 1024px;
   height: 576px;
-  title: "Maple for Plex";
-  background: DefaultStyle.background;
-  HorizontalLayout {
-    alignment: center;
-    VerticalLayout {
-      alignment: center;
-      btnLogin := Button {
-        text: "Login";
-      }
+
+  login := LoginScreen {
+    visible: root.selected-screen == 0;
+    login-clicked => {
+      root.login_clicked()
     }
   }
+
+  main := MainScreen {
+    visible: root.selected-screen == 1;
+  }
+
   //default-font-family: "Noto Sans";
   //default-font-size: DefaultStyle.base-font-size;
 }

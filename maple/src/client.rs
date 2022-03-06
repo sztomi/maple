@@ -1,18 +1,22 @@
+
 use anyhow::Result;
+use slint::{self, Weak};
 use webbrowser;
 use tokio::time::Duration;
 
 use plextvapi::{PlexTvClient, PLEXTV};
-use crate::app::AppEvent;
+use crate::{app::AppEvent, MainWindow};
 
 pub struct Client {
   plextv: PlexTvClient,
+  window: Weak<MainWindow>,
 }
 
 impl Client {
-  pub fn new() -> Result<Self> {
+  pub fn new(window: Weak<MainWindow>) -> Result<Self> {
     Ok(Client {
-      plextv: PlexTvClient::new(&PLEXTV)?
+      plextv: PlexTvClient::new(&PLEXTV)?,
+      window
     })
   }
 
@@ -38,6 +42,9 @@ impl Client {
         tokio::time::sleep(Duration::from_millis(1000)).await;
         if let Some(tk) = pinf.auth_token {
           token = Some(tk);
+          self.window.upgrade_in_event_loop(|window| {
+            window.set_selected_screen(1);
+          });
           break;
         }
         if tries > MAX_TRIES {

@@ -1,0 +1,18 @@
+import { Button } from "../widgets/button.slint";
+import { DefaultStyle } from "../common.slint";
+
+export LoginScreen := Rectangle {
+  callback login_clicked <=> btnLogin.clicked;
+
+  background: DefaultStyle.background;
+
+  HorizontalLayout {
+    alignment: center;
+    VerticalLayout {
+      alignment: center;
+      btnLogin := Button {
+        text: "Login";
+      }
+    }
+  }
+}

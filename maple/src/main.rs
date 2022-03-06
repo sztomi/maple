@@ -21,6 +21,7 @@ fn main() {
 
   log::info!("Maple for Plex starting");
   let mainwindow = MainWindow::new();
+  let mainwindow_weak = mainwindow.as_weak();
 
   mainwindow.on_login_clicked(move || {
     log::info!("Login clicked!");
@@ -28,7 +29,7 @@ fn main() {
   });
 
   thread::spawn(move || {
-    let mut client = Client::new().unwrap();
+    let mut client = Client::new(mainwindow_weak).unwrap();
     start_client(rx, &mut client);
   });
 
@@ -37,7 +38,7 @@ fn main() {
 
 
 #[tokio::main]
-async fn start_client<'a>(rx: Receiver<AppEvent>, client: &mut Client) {
+async fn start_client(rx: Receiver<AppEvent>, client: &mut Client) {
   while let Ok(event) = rx.recv() {
     if let Err(err) = client.handle_app_event(&event).await {
       log::error!("Could not handle event {:?}: {}", event, err);
