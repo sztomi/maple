@@ -4,7 +4,7 @@ import { MainScreen } from "screens/main.slint";
 
 MainWindow := Window {
   callback quit();
-  callback login_clicked();
+  callback login_clicked <=> login.login_clicked;
   property <int> selected-screen: 0;
 
   title: "Maple for Plex";
@@ -13,9 +13,6 @@ MainWindow := Window {
 
   login := LoginScreen {
     visible: root.selected-screen == 0;
-    login-clicked => {
-      root.login_clicked()
-    }
   }
 
   main := MainScreen {
