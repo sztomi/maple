@@ -1,0 +1,24 @@
+import { Skin } from "../../common.slint";
+
+export MenuItem := Rectangle {
+  property <image> icon <=> i.source;
+  property<string> name <=> t.text;
+  property<bool> active;
+  background: active ? rgba(100%, 100%, 100%, 14%) : ma.has-hover ? rgba(100%, 100%, 100%, 9%) : transparent;
+  ma := TouchArea {}
+  HorizontalLayout {
+    alignment: start;
+    spacing: 6px;
+    padding: 8px;
+    padding-left: 30px;
+    padding-right: 30px;
+    i := Image {
+      width: 14px;
+      height: source.height * 1px;
+    }
+    t := Text {
+      color: white;
+      font-size: Skin.MediumFont;
+    }
+  }
+}

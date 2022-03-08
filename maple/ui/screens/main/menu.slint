@@ -1,0 +1,43 @@
+import { Skin } from "../../common.slint";
+import { MenuItem } from "./menuitem.slint";
+
+
+export MenuBar := Rectangle {
+  background: Skin.menuBar;
+  property<int> active: 0;
+  width: 200px;
+  VerticalLayout {
+    padding-left: 0px;
+    padding-top: 35px;
+    padding-right: 0px;
+    padding-bottom: 12px;
+    spacing: 8px;
+    VerticalLayout {
+      // Margin hint for MenuBarTopLabel::Graphic
+      padding-left: 50px;
+      padding-top: 0px;
+      padding-right: 50px;
+      padding-bottom: 54px;
+
+      Image {
+        source: @image-url("images/main-icon.png");
+        height: source.height * 1px;
+      }
+    }
+    //###  In the original, the icon is derived from the name
+    for entry[idx] in [
+        { name: "Dashboard", icon: @image-url("images/dashboard.png") },
+        { name: "Rooms", icon: @image-url("images/rooms.png") },
+        { name: "Devices", icon: @image-url("images/devices.png") },
+        { name: "Statistics", icon: @image-url("images/statistics.png") },
+        { name: "Storage", icon: @image-url("images/storage.png") },
+        { name: "Members", icon: @image-url("images/members.png") },
+    ] : MenuItem {
+      name: entry.name;
+      icon: entry.icon;
+      active: root.active == idx;
+    }
+    Rectangle {}
+    MenuItem { name: "Logout"; icon: @image-url("images/logout.png"); }
+  }
+}

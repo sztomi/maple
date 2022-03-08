@@ -1,4 +1,4 @@
-import { DefaultStyle } from "../common.slint";
+import { Skin } from "../common.slint";
 
 export global Button := Rectangle {
   callback clicked <=> touch.clicked;
@@ -10,10 +10,10 @@ export global Button := Rectangle {
   border-radius: 6px;
   clip: true;
 
-  background: !enabled ? DefaultStyle.disabled
-    : touch.pressed ? DefaultStyle.highlightDarker
-    : touch.has-hover ? DefaultStyle.highlight
-    : DefaultStyle.accent;
+  background: !enabled ? Skin.disabled
+    : touch.pressed ? Skin.highlightDarker
+    : touch.has-hover ? Skin.highlight
+    : Skin.accent;
 
   Text {
     width: parent.width;

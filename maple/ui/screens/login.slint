@@ -1,10 +1,10 @@
 import { Button } from "../widgets/button.slint";
-import { DefaultStyle } from "../common.slint";
+import { Skin } from "../common.slint";
 
 export LoginScreen := Rectangle {
   callback login_clicked <=> btnLogin.clicked;
 
-  background: DefaultStyle.background;
+  background: Skin.background;
 
   HorizontalLayout {
     alignment: center;
