@@ -1,7 +1,7 @@
 use std::fs::{self, File};
 use std::path::PathBuf;
 
-use anyhow::Result;
+use anyhow::{Result, bail};
 use configparser;
 use directories::ProjectDirs;
 use log;
@@ -20,8 +20,23 @@ pub enum ConfigError {
   CouldNotWriteConfig { ini_error: String },
 }
 
+fn get_config_dir() -> Option<ProjectDirs> {
+  ProjectDirs::from("com", "Maple for Plex", "Maple")
+}
+
+pub fn get_config_file() -> Result<PathBuf> {
+  if let Some(proj_dirs) = get_config_dir() {
+    return Ok(PathBuf::from(format!(
+      "{}/{}",
+      proj_dirs.config_dir().display(),
+      CONFIG_FILE_NAME
+    )));
+  }
+  bail!(ConfigError::NoValidHome)
+}
+
 pub fn ensure_config_file() -> Result<PathBuf, ConfigError> {
-  if let Some(proj_dirs) = ProjectDirs::from("com", "Maple for Plex", "Maple") {
+  if let Some(proj_dirs) = get_config_dir() {
     let cfg_dir = PathBuf::from(proj_dirs.config_dir());
     if !cfg_dir.is_dir() {
       if let Err(e) = fs::create_dir_all(&cfg_dir) {

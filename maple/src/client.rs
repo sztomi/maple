@@ -2,11 +2,12 @@ use std::rc::Rc;
 
 use anyhow::Result;
 use slint::{self, Weak};
-use webbrowser;
 use tokio::time::Duration;
+use webbrowser;
 
-use plextvapi::{PlexTvClient, PLEXTV};
 use crate::{app::AppEvent, MainWindow, MenuItemData};
+use common::config;
+use plextvapi::{PlexTvClient, PLEXTV};
 
 pub struct Client {
   plextv: PlexTvClient,
@@ -17,17 +18,30 @@ impl Client {
   pub fn new(window: Weak<MainWindow>) -> Result<Self> {
     Ok(Client {
       plextv: PlexTvClient::new(&PLEXTV)?,
-      window
+      window,
     })
   }
 
   pub async fn handle_app_event(&mut self, event: &AppEvent) -> Result<()> {
     match event {
-      AppEvent::LoginRequested => self.do_login().await,
+      AppEvent::LoginRequested => self.on_login_requested().await,
+      AppEvent::Started => self.on_started().await,
     }
   }
 
-  async fn do_login(&mut self) -> Result<()> {
+  async fn on_started(&mut self) -> Result<()> {
+    let token = config::get("plextv", "token")?;
+    if token.is_some() {
+      self.plextv.set_token(token)?;
+      self.window.upgrade_in_event_loop(|window| {
+        window.set_selected_screen(1);
+      });
+      self.fill_sidebar().await?;
+    }
+    Ok(())
+  }
+
+  async fn on_login_requested(&mut self) -> Result<()> {
     log::trace!("Calling create_pin");
     let pin = self.plextv.create_pin(true).await?;
     log::trace!("Got pin: {}", pin.code);
@@ -41,6 +55,7 @@ impl Client {
         let pinf = self.plextv.try_pin(&pin).await?;
         tokio::time::sleep(Duration::from_millis(1000)).await;
         if pinf.auth_token.is_some() {
+          config::set("plextv", "token", &pinf.auth_token.as_deref().unwrap())?;
           self.plextv.set_token(pinf.auth_token)?;
           self.window.upgrade_in_event_loop(|window| {
             window.set_selected_screen(1);
@@ -62,7 +77,9 @@ impl Client {
     self.window.upgrade_in_event_loop(move |window| {
       let mut items = Vec::new();
       for res in resources {
-        items.push(MenuItemData{ title: res.name.into() });
+        items.push(MenuItemData {
+          title: res.name.into(),
+        });
       }
       let items_model = Rc::new(slint::VecModel::from(items));
       window.set_menu_items(items_model.clone().into());
