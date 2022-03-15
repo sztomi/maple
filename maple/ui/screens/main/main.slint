@@ -1,10 +1,12 @@
 import { Skin } from "../../common.slint";
 import { MenuBar } from "./menu.slint";
+import { MenuItemData } from "./menuitem.slint";
 
 export MainScreen := Rectangle {
+  property <[MenuItemData]> menu-items <=> menu.menu-items;
   HorizontalLayout {
     padding: 0; spacing: 0;
-    MenuBar {  }
+    menu := MenuBar {  }
     Text {
       text: "hello I'm the main screen"; }
   }

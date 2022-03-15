@@ -1,5 +1,10 @@
 import { Skin } from "../../common.slint";
 
+export struct MenuItemData := {
+  title: string,
+  //icon: string,
+}
+
 export MenuItem := Rectangle {
   property <image> icon <=> i.source;
   property<string> name <=> t.text;

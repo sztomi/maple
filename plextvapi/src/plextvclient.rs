@@ -64,6 +64,12 @@ impl PlexTvClient {
     self.token.is_some()
   }
 
+  pub fn set_token(&mut self, token: Option<String>) -> Result<()> {
+    self.token = token;
+    self.reset_headers()?;
+    Ok(())
+  }
+
   pub fn reset_headers(&mut self) -> Result<()> {
     let mut token: Option<String> = None;
     if self.token.is_some() {
