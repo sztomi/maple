@@ -1,17 +1,18 @@
 use std::rc::Rc;
 
 use anyhow::Result;
-use slint::{self, Weak};
+use slint::{self, Weak, VecModel};
 use tokio::time::Duration;
 use webbrowser;
 
 use crate::{app::AppEvent, MainWindow, MenuItemData};
 use common::config;
-use plextvapi::{PlexTvClient, PLEXTV};
+use plextvapi::{PlexTvClient, PLEXTV, types::Resource};
 
 pub struct Client {
   plextv: PlexTvClient,
   window: Weak<MainWindow>,
+  resources: Vec<Resource>
 }
 
 impl Client {
@@ -19,6 +20,7 @@ impl Client {
     Ok(Client {
       plextv: PlexTvClient::new(&PLEXTV)?,
       window,
+      resources: Vec::new(),
     })
   }
 
@@ -26,6 +28,8 @@ impl Client {
     match event {
       AppEvent::LoginRequested => self.on_login_requested().await,
       AppEvent::Started => self.on_started().await,
+      AppEvent::LogoutRequested => Ok(()),
+      AppEvent::MenuItemClicked(index) => self.on_menu_item_clicked(*index).await,
     }
   }
 
@@ -71,18 +75,28 @@ impl Client {
     Ok(())
   }
 
-  async fn fill_sidebar(&self) -> Result<()> {
+  async fn fill_sidebar(&mut self) -> Result<()> {
     log::trace!("Getting resources");
-    let resources = self.plextv.get_resources(true, true, true).await?;
+    self.resources = self.plextv.get_resources(true, true, true).await?;
+    let resources = self.resources.clone();
     self.window.upgrade_in_event_loop(move |window| {
       let mut items = Vec::new();
-      for res in resources {
+      for (idx, res) in resources.iter().enumerate() {
         items.push(MenuItemData {
-          title: res.name.into(),
+          index: idx as i32,
+          title: res.name.clone().into(),
         });
       }
       let items_model = Rc::new(slint::VecModel::from(items));
       window.set_menu_items(items_model.clone().into());
+    });
+    Ok(())
+  }
+
+  async fn on_menu_item_clicked(&self, index: i32) -> Result<()> {
+    log::info!("item was {:?}", self.resources[index as usize]);
+    self.window.upgrade_in_event_loop(move |window| {
+      window.set_menu_active(index);
     });
     Ok(())
   }

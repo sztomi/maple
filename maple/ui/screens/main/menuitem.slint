@@ -2,13 +2,17 @@ import { Skin } from "../../common.slint";
 
 export struct MenuItemData := {
   title: string,
+  index: int,
   //icon: string,
 }
 
 export MenuItem := Rectangle {
   property <image> icon <=> i.source;
-  property<string> name <=> t.text;
-  property<bool> active;
+  property <string> name <=> t.text;
+  property <bool> active;
+  property <int> index;
+  callback clicked <=> ma.clicked;
+
   background: active ? rgba(100%, 100%, 100%, 14%) : ma.has-hover ? rgba(100%, 100%, 100%, 9%) : transparent;
   ma := TouchArea {}
   HorizontalLayout {

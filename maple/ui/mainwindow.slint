@@ -6,8 +6,12 @@ import { MenuItemData } from "./screens/main/menuitem.slint";
 MainWindow := Window {
   callback quit();
   callback login_clicked <=> login.login_clicked;
+  callback logout_clicked <=> main.logout_clicked;
+  callback menu_item_clicked <=> main.menu-item-clicked;
+
   property <int> selected-screen: 0;
   property menu-items <=> main.menu-items;
+  property menu-active <=> main.menu-active;
 
   title: "Maple for Plex";
   width: 1024px;

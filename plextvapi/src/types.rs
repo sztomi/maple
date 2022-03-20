@@ -11,7 +11,7 @@ pub struct PlexTvErrors {
   pub errors: Vec<PlexTvError>,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Default, Clone)]
 pub struct Connection {
   pub protocol: String,
   pub address: String,
@@ -65,7 +65,7 @@ pub struct PinInfo {
   pub new_registration: Option<bool>,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Resource {
   pub name: String,

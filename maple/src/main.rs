@@ -27,14 +27,26 @@ fn main() -> Result<()> {
   let tx = Arc::new(tx);
 
   let mainwindow = MainWindow::new();
-  let mainwindow_weak = mainwindow.as_weak();
 
   let tx_1 = tx.clone();
   mainwindow.on_login_clicked(move || {
     log::info!("Login clicked!");
-    tx_1.clone().send(AppEvent::LoginRequested);
+    tx_1.clone().send(AppEvent::LoginRequested).ok();
   });
 
+  let tx_2 = tx.clone();
+  mainwindow.on_logout_clicked(move || {
+    log::info!("Logout clicked!");
+    tx_2.clone().send(AppEvent::LogoutRequested).ok();
+  });
+
+  let tx_3 = tx.clone();
+  mainwindow.on_menu_item_clicked(move |index| {
+    log::info!("menu item {} clicked!", index);
+    tx_3.clone().send(AppEvent::MenuItemClicked(index)).ok();
+  });
+
+  let mainwindow_weak = mainwindow.as_weak();
   thread::spawn(move || {
     let mut client = Client::new(mainwindow_weak).unwrap();
     start_client(rx, &mut client);
