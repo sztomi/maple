@@ -156,3 +156,31 @@ pub struct User {
   pub username: String,
   pub uuid: String,
 }
+
+#[derive(Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Pivot {
+  pub id: String,
+  pub key: String,
+  #[serde(rename = "type")]
+  pub type_desc: String,
+  pub title: String,
+  pub context: String,
+  pub symbol: String,
+}
+
+#[derive(Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Directory {
+  pub hub_key: String,
+  pub title: String,
+
+}
+
+#[derive(Deserialize, Debug, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct Feature {
+  #[serde(rename = "type")]
+  pub type_desc: String,
+  pub key: Option<String>,
+}
