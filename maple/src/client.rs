@@ -7,7 +7,11 @@ use webbrowser;
 
 use crate::{app::AppEvent, errors::ClientError, MainWindow, MenuItemData};
 use common::config;
-use plextvapi::{errors::{ApiErrors, ApiError::Unauthorized}, types::Resource, PlexTvClient, PLEXTV};
+use plextvapi::{
+  errors::{ApiError::Unauthorized, ApiErrors},
+  types::{Resource, Service},
+  PlexTvClient, PLEXTV,
+};
 
 pub struct Client {
   plextv: PlexTvClient,
@@ -15,10 +19,9 @@ pub struct Client {
   resources: Vec<Resource>,
 }
 
-
 enum Screen {
   LoginScreen = 0,
-  MainScreen = 1
+  MainScreen = 1,
 }
 
 impl Client {
@@ -43,11 +46,11 @@ impl Client {
     for error in errors.iter() {
       match error {
         Unauthorized => {
-          log::info!("Token likely invalid, retrying login.");
+          log::info!("Token invalid, retrying login.");
           self.plextv.set_token(None);
           self.set_screen(Screen::LoginScreen)
-        },
-        _ => ()
+        }
+        _ => (),
       }
     }
   }
@@ -100,14 +103,14 @@ impl Client {
 
   async fn fill_sidebar(&mut self) -> Result<(), ClientError> {
     log::trace!("Getting resources");
-    self.resources = self
-      .plextv
-      .get_resources(true, true, true)
-      .await?;
+    self.resources = self.plextv.get_resources(true, true, true).await?;
     let resources = self.resources.clone();
     self.window.upgrade_in_event_loop(move |window| {
       let mut items = Vec::new();
       for (idx, res) in resources.iter().enumerate() {
+        if !res.provides.contains(&Service::Server) {
+          continue;
+        }
         items.push(MenuItemData {
           index: idx as i32,
           title: res.name.clone().into(),

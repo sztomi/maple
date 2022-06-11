@@ -1,4 +1,9 @@
+use std::str::FromStr;
+
 use serde::Deserialize;
+use serde_aux::prelude::*;
+
+use crate::errors::InternalClientError;
 
 #[derive(Deserialize, Debug, Default, Clone)]
 pub struct Connection {
@@ -54,6 +59,36 @@ pub struct PinInfo {
   pub new_registration: Option<bool>,
 }
 
+// The `provides` field items for `Resource`
+#[derive(Debug, Deserialize, Clone, PartialEq)]
+pub enum Service {
+  Server,
+  Client,
+  Player,
+  PubSubPlayer,
+  Controller,
+  SyncTarget,
+  ProviderPlayback,
+}
+
+impl FromStr for Service {
+  type Err = InternalClientError;
+
+  fn from_str(s: &str) -> Result<Self, Self::Err> {
+    log::info!("s = {}", &s);
+    match s {
+      "server" => Ok(Service::Server),
+      "client" => Ok(Service::Client),
+      "player" => Ok(Service::Player),
+      "pubsub-player" => Ok(Service::PubSubPlayer),
+      "controller" => Ok(Service::Controller),
+      "sync-target" => Ok(Service::SyncTarget),
+      "provider-playback" => Ok(Service::ProviderPlayback),
+      _ => Err(InternalClientError::UnparseableService((&s).to_string())),
+    }
+  }
+}
+
 #[derive(Deserialize, Debug, Default, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Resource {
@@ -66,7 +101,8 @@ pub struct Resource {
   pub client_identifier: String,
   pub created_at: String,
   pub last_seen_at: String,
-  pub provides: String,
+  #[serde(deserialize_with = "deserialize_vec_from_string_or_vec")]
+  pub provides: Vec<Service>,
   pub source_title: Option<String>,
   pub public_address: String,
   pub access_token: Option<String>,
@@ -163,7 +199,6 @@ pub struct Pivot {
 pub struct Directory {
   pub hub_key: String,
   pub title: String,
-
 }
 
 #[derive(Deserialize, Debug, Default)]

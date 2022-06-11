@@ -244,7 +244,7 @@ impl PlexTvClient {
   async fn post<T: DeserializeOwned>(&self, path: &str) -> Result<T, RequestError> {
     let req_addr = format!("{}/{}", &self.base_url, path);
     log::trace!("POST {}", req_addr);
-    let mut builder = self.client.post(&req_addr);
+    let builder = self.client.post(&req_addr);
     let resp = builder
       .send()
       .await

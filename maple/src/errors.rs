@@ -1,4 +1,3 @@
-
 use common::config::ConfigError;
 use plextvapi::RequestError;
 

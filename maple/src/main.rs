@@ -1,15 +1,14 @@
 slint::include_modules!();
 
-use std::thread;
 use std::sync::Arc;
+use std::thread;
 
-use log;
-use flume::{self, Receiver};
-use tokio;
 use anyhow::Result;
+use flume::{self, Receiver};
+use log;
+use tokio;
 
-use common::{logging::setup_logging, config::get_config_file};
-
+use common::{config::get_config_file, logging::setup_logging};
 
 mod app;
 mod client;
@@ -18,8 +17,7 @@ mod errors;
 use app::AppEvent;
 use client::Client;
 
-use crate::errors::ClientError::{RequestError, ConfigError};
-
+use crate::errors::ClientError::{ConfigError, RequestError};
 
 fn main() -> Result<()> {
   setup_logging();
@@ -61,7 +59,6 @@ fn main() -> Result<()> {
   mainwindow.run();
   Ok(())
 }
-
 
 #[tokio::main]
 async fn start_client(rx: Receiver<AppEvent>, client: &mut Client) {

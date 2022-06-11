@@ -299,6 +299,14 @@ impl Deref for PlexTvErrors {
 
 impl FromIterator<ApiError> for ApiErrors {
   fn from_iter<T: IntoIterator<Item = ApiError>>(iter: T) -> Self {
-    Self { errors: Vec::from_iter(iter) }
+    Self {
+      errors: Vec::from_iter(iter),
+    }
   }
+}
+
+#[derive(Debug, Error)]
+pub enum InternalClientError {
+  #[error("Could not parse service item {0}")]
+  UnparseableService(String),
 }
