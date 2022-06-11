@@ -843,6 +843,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "enumn"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "052bc8773a98bd051ff37db74a8a25f00e6bfa2cbd03373390c72e9f7afbf344"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "euclid"
 version = "0.22.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2314,6 +2325,8 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "common",
+ "crc32fast",
+ "enumn",
  "log",
  "reqwest",
  "serde",
