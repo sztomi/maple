@@ -3,13 +3,19 @@ import { Skin } from "../../common.slint";
 export struct MenuItemData := {
   title: string,
   index: int,
+  is-sub: bool,
   //icon: string,
+}
+
+export global MenuConstants := {
+  property <length> menuitem-height: 20px;
 }
 
 export MenuItem := Rectangle {
   property <image> icon <=> i.source;
   property <string> name <=> t.text;
   property <bool> active;
+  property <bool> is-sub;
   property <int> index;
   callback clicked <=> ma.clicked;
 
@@ -19,7 +25,7 @@ export MenuItem := Rectangle {
     alignment: start;
     spacing: 6px;
     padding: 8px;
-    padding-left: 30px;
+    padding-left: is-sub ? 30px : 10px;
     padding-right: 30px;
     i := Image {
       width: 14px;

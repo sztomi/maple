@@ -12,10 +12,11 @@ MainWindow := Window {
   property <int> selected-screen: 0;
   property menu-items <=> main.menu-items;
   property menu-active <=> main.menu-active;
+  property menu-viewport-height <=> main.menu-viewport-height;
 
   title: "Maple for Plex";
-  width: 1024px;
-  height: 576px;
+  preferred-width: 1024px;
+  preferred-height: 576px;
 
   login := LoginScreen {
     visible: root.selected-screen == 0;

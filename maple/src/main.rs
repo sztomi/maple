@@ -13,9 +13,12 @@ use common::{logging::setup_logging, config::get_config_file};
 
 mod app;
 mod client;
+mod errors;
 
 use app::AppEvent;
 use client::Client;
+
+use crate::errors::ClientError::{RequestError, ConfigError};
 
 
 fn main() -> Result<()> {
@@ -28,6 +31,7 @@ fn main() -> Result<()> {
 
   let mainwindow = MainWindow::new();
 
+  // TODO(sztomi): probably macro this pattern
   let tx_1 = tx.clone();
   mainwindow.on_login_clicked(move || {
     log::info!("Login clicked!");
@@ -63,7 +67,14 @@ fn main() -> Result<()> {
 async fn start_client(rx: Receiver<AppEvent>, client: &mut Client) {
   while let Ok(event) = rx.recv() {
     if let Err(err) = client.handle_app_event(&event).await {
-      log::error!("Could not handle event {:?}: {}", event, err);
+      log::error!("Could not handle event {:?}: {:?}", event, err);
+      match err {
+        RequestError(err) => match err {
+          plextvapi::RequestError::Error(apierrs) => client.handle_api_error(&apierrs).await,
+          _ => (),
+        },
+        _ => (),
+      }
     }
   }
 }

@@ -5,8 +5,11 @@ import { MenuItemData } from "./menuitem.slint";
 export MainScreen := Rectangle {
   callback logout_clicked <=> menu.logout_clicked;
   callback menu_item_clicked <=> menu.item-clicked;
+
   property <[MenuItemData]> menu-items <=> menu.menu-items;
   property menu-active <=> menu.active;
+  property menu-viewport-height <=> menu.viewport-height;
+
   HorizontalLayout {
     padding: 0; spacing: 0;
     menu := MenuBar {  }

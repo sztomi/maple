@@ -1,3 +1,5 @@
+import { ScrollView } from "std-widgets.slint";
+
 import { Skin } from "../../common.slint";
 import { MenuItem, MenuItemData } from "./menuitem.slint";
 
@@ -5,41 +7,46 @@ export MenuBar := Rectangle {
   callback logout_clicked <=> logout.clicked;
   callback item_clicked(int);
   property <int> active: 0;
+  property <length> viewport-height;
   property <[MenuItemData]> menu-items;
 
   background: Skin.menuBar;
   width: 200px;
 
-  VerticalLayout {
-    padding-left: 0px;
-    padding-top: 35px;
-    padding-right: 0px;
-    padding-bottom: 12px;
-    spacing: 8px;
+  ScrollView {
     VerticalLayout {
-      padding-left: 50px;
-      padding-top: 0px;
-      padding-right: 50px;
-      padding-bottom: 54px;
+      padding-left: 0px;
+      padding-top: 35px;
+      padding-right: 0px;
+      padding-bottom: 12px;
+      spacing: 8px;
+      VerticalLayout {
+        padding-left: 50px;
+        padding-top: 0px;
+        padding-right: 50px;
+        padding-bottom: 54px;
 
-      Image {
-        source: @image-url("images/main-icon.png");
-        height: source.height * 1px;
+        Image {
+          source: @image-url("images/main-icon.png");
+          height: source.height * 1px;
+        }
       }
-    }
-    //###  In the original, the icon is derived from the name
-    for entry[idx] in root.menu-items : MenuItem {
-      name: entry.title;
-      index: idx;
-      //icon: entry.icon;
-      active: root.active == idx;
-      clicked => { root.item-clicked(self.index) }
-    }
-    Rectangle {}
 
-    logout := MenuItem {
-      name: "Logout";
-      icon: @image-url("images/logout.png");
+      for entry[idx] in root.menu-items : MenuItem {
+        name: entry.title;
+        index: idx;
+        //icon: entry.icon;
+        active: root.active == idx;
+        is-sub: entry.is-sub;
+        clicked => { root.item-clicked(self.index) }
+      }
+
+      Rectangle {}
+
+      logout := MenuItem {
+        name: "Logout";
+        icon: @image-url("images/logout.png");
+      }
     }
   }
 }

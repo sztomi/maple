@@ -1,16 +1,5 @@
 use serde::Deserialize;
 
-#[derive(Deserialize, Debug, Default)]
-pub struct PlexTvError {
-  pub code: u32,
-  pub message: String,
-  pub status: u32,
-}
-#[derive(Deserialize, Debug, Default)]
-pub struct PlexTvErrors {
-  pub errors: Vec<PlexTvError>,
-}
-
 #[derive(Deserialize, Debug, Default, Clone)]
 pub struct Connection {
   pub protocol: String,
