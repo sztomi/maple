@@ -49,7 +49,7 @@ impl ApiClient {
     let resp = builder.send().await?;
 
     let status = resp.status();
-    let resp_text = resp.text().await.map_err(|e| RequestError::SendError(e))?;
+    let resp_text = resp.text().await.map_err(RequestError::SendError)?;
 
     if !status.is_success() {
       let deser_errs = serde_json::from_str::<PlexTvErrors>(&resp_text);
@@ -63,7 +63,7 @@ impl ApiClient {
               .iter()
               .map(|err| err.try_into())
               .filter_map(|item| {
-                if !item.is_ok() {
+                if item.is_err() {
                   log::warn!("Could not convert PlexTvError error to ApiError!");
                   return None;
                 }
@@ -99,7 +99,7 @@ impl ApiClient {
     let resp = builder
       .send()
       .await
-      .map_err(|e| RequestError::SendError(e))?;
+      .map_err(RequestError::SendError)?;
 
     let status = resp.status();
     let resp_text = resp.text().await?;
@@ -116,7 +116,7 @@ impl ApiClient {
               .iter()
               .map(|err| err.try_into())
               .filter_map(|item| {
-                if !item.is_ok() {
+                if item.is_err() {
                   log::warn!("Could not convert PlexTvError error to ApiError!");
                   return None;
                 }

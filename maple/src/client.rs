@@ -3,7 +3,6 @@ use std::rc::Rc;
 use anyhow::Result;
 use slint::{self, Weak};
 use tokio::time::Duration;
-use webbrowser;
 
 use crate::{app::AppEvent, errors::ClientError, MainWindow, MenuItemData};
 use common::config;
@@ -27,7 +26,7 @@ enum Screen {
 impl Client {
   pub fn new(window: Weak<MainWindow>) -> Result<Self> {
     Ok(Client {
-      plextv: PlexTvClient::new(&PLEXTV)?,
+      plextv: PlexTvClient::new(PLEXTV)?,
       window,
       resources: Vec::new(),
     })
@@ -38,10 +37,11 @@ impl Client {
       AppEvent::LoginRequested => self.on_login_requested().await,
       AppEvent::Started => self.on_started().await,
       AppEvent::LogoutRequested => Ok(()),
-      AppEvent::MenuItemClicked(index) => Ok(self.on_menu_item_clicked(*index).await),
+      AppEvent::MenuItemClicked(index) => { self.on_menu_item_clicked(*index).await; Ok(()) },
     }
   }
 
+  #[allow(clippy::single_match)]
   pub async fn handle_api_error(&mut self, errors: &ApiErrors) {
     for error in errors.iter() {
       match error {
@@ -85,7 +85,7 @@ impl Client {
         let pinf = self.plextv.try_pin(&pin).await?;
         tokio::time::sleep(Duration::from_millis(1000)).await;
         if pinf.auth_token.is_some() {
-          config::set("plextv", "token", &pinf.auth_token.as_deref().unwrap())?;
+          config::set("plextv", "token", pinf.auth_token.as_deref().unwrap())?;
           self.plextv.set_token(pinf.auth_token);
           self.window.upgrade_in_event_loop(|window| {
             window.set_selected_screen(1);
@@ -118,7 +118,7 @@ impl Client {
         });
       }
       let items_model = Rc::new(slint::VecModel::from(items));
-      window.set_menu_items(items_model.clone().into());
+      window.set_menu_items(items_model.into());
     });
     Ok(())
   }

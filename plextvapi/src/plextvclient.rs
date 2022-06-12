@@ -60,7 +60,7 @@ impl PlexTvClient {
 
     Ok(Self {
       token: config::get("plextv", "token")?,
-      client: ApiClient::new(&base_url, headers),
+      client: ApiClient::new(base_url, headers),
     })
   }
 
@@ -140,7 +140,6 @@ impl PlexTvClient {
       "{}/auth#?clientID={}&code={}",
       APP_PLEXTV, CLIENT_ID, pin.code
     )
-    .to_string()
   }
 
   pub async fn try_pin(&self, pin: &CreatePinResponse) -> Result<PinInfo, RequestError> {

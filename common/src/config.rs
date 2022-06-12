@@ -73,11 +73,11 @@ pub fn get(section: &str, key: &str) -> Result<Option<String>, ConfigError> {
   let mut config = configparser::ini::Ini::new();
   if let Err(e) = config.load(&cfg_file) {
     return Err(ConfigError::CouldNotLoadConfig {
-      ini_error: e.to_string(),
+      ini_error: e,
     });
   }
-  match config.get(&section, &key) {
-    Some(val) => Ok(Some(val.clone())),
+  match config.get(section, key) {
+    Some(val) => Ok(Some(val)),
     None => Ok(None),
   }
 }
@@ -92,7 +92,7 @@ pub fn set(section: &str, key: &str, value: &str) -> Result<(), ConfigError> {
     cfg_file.display()
   );
   let mut config = configparser::ini::Ini::new();
-  config.set(&section, &key, Some((&value).to_string()));
+  config.set(section, key, Some((&value).to_string()));
   if let Err(e) = config.write(cfg_file) {
     return Err(ConfigError::CouldNotWriteConfig {
       ini_error: e.to_string(),

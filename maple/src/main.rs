@@ -5,8 +5,6 @@ use std::thread;
 
 use anyhow::Result;
 use flume::{self, Receiver};
-use log;
-use tokio;
 
 use common::{config::get_config_file, logging::setup_logging};
 
@@ -17,7 +15,7 @@ mod errors;
 use app::AppEvent;
 use client::Client;
 
-use crate::errors::ClientError::{ConfigError, RequestError};
+use crate::errors::ClientError;
 
 fn main() -> Result<()> {
   setup_logging();
@@ -61,16 +59,15 @@ fn main() -> Result<()> {
 }
 
 #[tokio::main]
+#[allow(clippy::collapsible_match)]
 async fn start_client(rx: Receiver<AppEvent>, client: &mut Client) {
   while let Ok(event) = rx.recv() {
     if let Err(err) = client.handle_app_event(&event).await {
       log::error!("Could not handle event {:?}: {:?}", event, err);
-      match err {
-        RequestError(err) => match err {
-          plextvapi::RequestError::Error(apierrs) => client.handle_api_error(&apierrs).await,
-          _ => (),
-        },
-        _ => (),
+      if let ClientError::RequestError(err) = err {
+        if let plextvapi::RequestError::Error(apierrs) = err {
+          client.handle_api_error(&apierrs).await
+        }
       }
     }
   }

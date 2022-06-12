@@ -6,7 +6,7 @@ pub fn setup_logging() {
     .error(Color::Red)
     .warn(Color::Yellow);
 
-  let colors_level = colors_line.clone().info(Color::Green);
+  let colors_level = colors_line.info(Color::Green);
   fern::Dispatch::new()
     .format(move |out, message, record| {
       out.finish(format_args!(
