@@ -1,25 +1,23 @@
-use std::sync::mpsc::SendError;
 
-use anyhow::{bail, Result};
+use anyhow::Result;
 use reqwest::header;
 use reqwest::header::{HeaderMap, HeaderValue};
-use serde::de::DeserializeOwned;
 use thiserror::Error;
 
+use common::config;
+
+use crate::apiclient::ApiClient;
 use crate::errors::*;
 use crate::types::*;
-use common::config;
 
 pub const PLEXTV: &str = "https://plex.tv";
 pub const APP_PLEXTV: &str = "https://app.plex.tv";
 const CLIENT_ID: &str = "Maple_1_0";
 
-type QueryParams<'a> = Vec<(&'a str, &'a str)>;
 
 pub struct PlexTvClient {
-  base_url: String,
   token: Option<String>,
-  client: reqwest::Client,
+  client: ApiClient,
 }
 
 #[derive(Error, Debug)]
@@ -61,11 +59,8 @@ impl PlexTvClient {
     let headers = create_default_headers(None)?;
 
     Ok(Self {
-      base_url: base_url.to_owned(),
       token: config::get("plextv", "token")?,
-      client: reqwest::Client::builder()
-        .default_headers(headers)
-        .build()?,
+      client: ApiClient::new(&base_url, headers),
     })
   }
 
@@ -84,14 +79,7 @@ impl PlexTvClient {
       token = Some(self.token.as_deref().unwrap().to_string());
     }
     let headers = create_default_headers(token).unwrap();
-    let client = reqwest::Client::builder().default_headers(headers).build();
-    match client {
-      Ok(client) => self.client = client,
-      Err(err) => {
-        log::error!("Could not create reqwest client: {}", err);
-        panic!("Fatal error: cannot continue without a client!");
-      }
-    }
+    self.client.reset_headers(headers);
   }
 
   /// Creates a pin that can be used for authentication.
@@ -141,6 +129,7 @@ impl PlexTvClient {
       log::debug!("Getting new token despite a cached one existing.");
     }
     let resp = self
+      .client
       .post::<CreatePinResponse>(&format!("/api/v2/pins?strong={}", strong))
       .await?;
     Ok(resp)
@@ -156,6 +145,7 @@ impl PlexTvClient {
 
   pub async fn try_pin(&self, pin: &CreatePinResponse) -> Result<PinInfo, RequestError> {
     self
+      .client
       .get::<PinInfo>(&format!("/api/v2/pins/{}", pin.id), None)
       .await
   }
@@ -168,6 +158,7 @@ impl PlexTvClient {
   ) -> Result<Vec<Resource>, RequestError> {
     use common::conversion::bool_to_num;
     let resources = self
+      .client
       .get::<Vec<Resource>>(
         "/api/v2/resources",
         Some(vec![
@@ -181,116 +172,6 @@ impl PlexTvClient {
   }
 
   pub async fn get_user(&self) -> Result<User, RequestError> {
-    self.get::<User>("/api/v2/user", None).await
-  }
-
-  async fn get<T: DeserializeOwned>(
-    &self,
-    path: &str,
-    params: Option<QueryParams<'_>>,
-  ) -> Result<T, RequestError> {
-    let req_addr = format!("{}/{}", &self.base_url, path);
-    log::trace!("GET {}", req_addr);
-    let mut builder = self.client.get(&req_addr);
-    if let Some(params) = params {
-      builder = builder.query(&params);
-    }
-    let resp = builder.send().await?;
-
-    let status = resp.status();
-    let resp_text = resp.text().await.map_err(|e| RequestError::SendError(e))?;
-
-    if !status.is_success() {
-      let deser_errs = serde_json::from_str::<PlexTvErrors>(&resp_text);
-      match deser_errs {
-        Ok(errors) => {
-          for err in errors.errors.iter() {
-            log::error!("Error from {}: {:?}", path, err);
-          }
-          return Err(RequestError::Error(
-            errors
-              .iter()
-              .map(|err| err.try_into())
-              .filter_map(|item| {
-                if !item.is_ok() {
-                  log::warn!("Could not convert PlexTvError error to ApiError!");
-                  return None;
-                }
-                Some(item.unwrap())
-              })
-              .collect(),
-          ));
-        }
-        Err(err) => {
-          log::error!(
-            "Could not deserialize error response. Text was: {}",
-            resp_text
-          );
-          return Err(RequestError::DeserError(err));
-        }
-      }
-    }
-
-    let deser_result = serde_json::from_str::<T>(&resp_text);
-    match deser_result {
-      Ok(val) => Ok(val),
-      Err(err) => {
-        log::trace!("Could not decode json: {}", resp_text);
-        Err(RequestError::DeserError(err))
-      }
-    }
-  }
-
-  async fn post<T: DeserializeOwned>(&self, path: &str) -> Result<T, RequestError> {
-    let req_addr = format!("{}/{}", &self.base_url, path);
-    log::trace!("POST {}", req_addr);
-    let builder = self.client.post(&req_addr);
-    let resp = builder
-      .send()
-      .await
-      .map_err(|e| RequestError::SendError(e))?;
-
-    let status = resp.status();
-    let resp_text = resp.text().await?;
-
-    if !status.is_success() {
-      let deser_errs = serde_json::from_str::<PlexTvErrors>(&resp_text);
-      match deser_errs {
-        Ok(errors) => {
-          for err in errors.errors.iter() {
-            log::error!("Error from {}: {:?}", path, err);
-          }
-          return Err(RequestError::Error(
-            errors
-              .iter()
-              .map(|err| err.try_into())
-              .filter_map(|item| {
-                if !item.is_ok() {
-                  log::warn!("Could not convert PlexTvError error to ApiError!");
-                  return None;
-                }
-                Some(item.unwrap())
-              })
-              .collect(),
-          ));
-        }
-        Err(err) => {
-          log::error!(
-            "Could not deserialize error response. Text was: {}",
-            resp_text
-          );
-          return Err(RequestError::DeserError(err));
-        }
-      }
-    }
-
-    let deser_result = serde_json::from_str::<T>(&resp_text);
-    match deser_result {
-      Ok(val) => Ok(val),
-      Err(err) => {
-        log::trace!("Could not decode json: {}", resp_text);
-        Err(RequestError::DeserError(err))
-      }
-    }
+    self.client.get::<User>("/api/v2/user", None).await
   }
 }

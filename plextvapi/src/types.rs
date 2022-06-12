@@ -75,7 +75,6 @@ impl FromStr for Service {
   type Err = InternalClientError;
 
   fn from_str(s: &str) -> Result<Self, Self::Err> {
-    log::info!("s = {}", &s);
     match s {
       "server" => Ok(Service::Server),
       "client" => Ok(Service::Client),
