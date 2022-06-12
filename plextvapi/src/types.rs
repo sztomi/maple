@@ -181,29 +181,130 @@ pub struct User {
   pub uuid: String,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Root {
+  #[serde(rename = "MediaContainer")]
+  pub media_container: MediaContainer,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaContainer {
+  pub size: i32,
+  pub allow_camera_upload: bool,
+  pub allow_channel_access: bool,
+  pub allow_media_deletion: bool,
+  pub allow_sharing: bool,
+  pub allow_sync: bool,
+  pub allow_tuners: bool,
+  pub audiobook: i32,
+  pub background_processing: bool,
+  pub certificate: bool,
+  pub companion_proxy: bool,
+  pub country_code: String,
+  pub diagnostics: String,
+  pub event_stream: bool,
+  pub friendly_name: String,
+  pub livetv: i32,
+  pub machine_identifier: String,
+  pub music_analysis: i32,
+  pub my_plex: bool,
+  pub my_plex_mapping_state: String,
+  pub my_plex_signin_state: String,
+  pub my_plex_subscription: bool,
+  pub my_plex_username: String,
+  pub offline_transcode: i32,
+  pub owner_features: String,
+  pub photo_auto_tag: bool,
+  pub platform: String,
+  pub platform_version: String,
+  pub plugin_host: bool,
+  pub push_notifications: bool,
+  pub read_only_libraries: bool,
+  #[serde(rename = "streamingBrainABRVersion")]
+  pub streaming_brain_abrversion: i32,
+  pub streaming_brain_version: i32,
+  pub sync: bool,
+  pub transcoder_active_video_sessions: i32,
+  pub transcoder_audio: bool,
+  pub transcoder_lyrics: bool,
+  pub transcoder_subtitles: bool,
+  pub transcoder_video: bool,
+  pub transcoder_video_bitrates: String,
+  pub transcoder_video_qualities: String,
+  pub transcoder_video_resolutions: String,
+  pub updated_at: i32,
+  pub updater: bool,
+  pub version: String,
+  pub voice_search: bool,
+  #[serde(rename = "MediaProvider")]
+  pub media_provider: Vec<MediaProvider>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct MediaProvider {
+  pub identifier: String,
+  pub title: String,
+  pub types: String,
+  pub protocols: String,
+  #[serde(rename = "Feature")]
+  pub feature: Vec<Feature>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Feature {
+  pub key: Option<String>,
+  #[serde(rename = "type")]
+  pub type_field: String,
+  #[serde(rename = "Directory")]
+  pub directory: Option<Vec<Directory>>,
+  #[serde(rename = "Action")]
+  #[serde(default)]
+  pub action: Vec<Action>,
+  pub flavor: Option<String>,
+  pub scrobble_key: Option<String>,
+  pub unscrobble_key: Option<String>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Directory {
+  pub hub_key: Option<String>,
+  pub title: String,
+  pub agent: Option<String>,
+  pub language: Option<String>,
+  pub refreshing: Option<bool>,
+  pub scanner: Option<String>,
+  pub uuid: Option<String>,
+  pub id: Option<String>,
+  pub key: Option<String>,
+  #[serde(rename = "type")]
+  pub type_field: Option<String>,
+  pub updated_at: Option<i32>,
+  pub scanned_at: Option<i32>,
+  #[serde(rename = "Pivot")]
+  #[serde(default)]
+  pub pivot: Vec<Pivot>,
+}
+
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct Pivot {
   pub id: String,
   pub key: String,
   #[serde(rename = "type")]
-  pub type_desc: String,
+  pub type_field: String,
   pub title: String,
   pub context: String,
   pub symbol: String,
 }
 
-#[derive(Deserialize, Debug, Default)]
+#[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Directory {
-  pub hub_key: String,
-  pub title: String,
-}
-
-#[derive(Deserialize, Debug, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct Feature {
-  #[serde(rename = "type")]
-  pub type_desc: String,
-  pub key: Option<String>,
+pub struct Action {
+  pub id: String,
+  pub key: String,
 }

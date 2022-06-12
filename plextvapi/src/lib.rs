@@ -1,7 +1,10 @@
 pub mod errors;
 pub mod plextvclient;
 pub mod types;
-mod apiclient;
+pub mod serverclient;
+mod constants;
 
 pub use plextvclient::{PlexTvClient, RequestError};
-pub use plextvclient::{APP_PLEXTV, PLEXTV};
+pub use constants::{APP_PLEXTV, PLEXTV};
+
+mod apiclient;

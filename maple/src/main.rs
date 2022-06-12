@@ -11,6 +11,7 @@ use common::{config::get_config_file, logging::setup_logging};
 mod app;
 mod client;
 mod errors;
+mod constants;
 
 use app::AppEvent;
 use client::Client;

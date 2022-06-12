@@ -1,4 +1,3 @@
-
 use anyhow::Result;
 use reqwest::header;
 use reqwest::header::{HeaderMap, HeaderValue};
@@ -7,17 +6,13 @@ use thiserror::Error;
 use common::config;
 
 use crate::apiclient::ApiClient;
-use crate::errors::*;
+use crate::{errors::*, APP_PLEXTV};
 use crate::types::*;
-
-pub const PLEXTV: &str = "https://plex.tv";
-pub const APP_PLEXTV: &str = "https://app.plex.tv";
-const CLIENT_ID: &str = "Maple_1_0";
-
 
 pub struct PlexTvClient {
   token: Option<String>,
   client: ApiClient,
+  client_id: &'static str,
 }
 
 #[derive(Error, Debug)]
@@ -36,7 +31,7 @@ impl From<reqwest::Error> for RequestError {
   }
 }
 
-fn create_default_headers(token: Option<String>) -> Result<HeaderMap> {
+fn create_default_headers(token: Option<String>, client_id: &'static str) -> Result<HeaderMap> {
   let mut headers = HeaderMap::new();
   headers.insert(
     header::CONTENT_TYPE,
@@ -45,7 +40,7 @@ fn create_default_headers(token: Option<String>) -> Result<HeaderMap> {
   headers.insert(header::ACCEPT, HeaderValue::from_static("application/json"));
   headers.insert(
     "X-Plex-Client-Identifier",
-    HeaderValue::from_static(CLIENT_ID),
+    HeaderValue::from_static(client_id),
   );
   headers.insert("X-Plex-Product", HeaderValue::from_static("Maple for Plex"));
   if let Some(tk) = token {
@@ -55,12 +50,13 @@ fn create_default_headers(token: Option<String>) -> Result<HeaderMap> {
 }
 
 impl PlexTvClient {
-  pub fn new(base_url: &'static str) -> Result<Self> {
-    let headers = create_default_headers(None)?;
+  pub fn new(base_url: &'static str, client_id: &'static str) -> Result<Self> {
+    let headers = create_default_headers(None, client_id)?;
 
     Ok(Self {
       token: config::get("plextv", "token")?,
       client: ApiClient::new(base_url, headers),
+      client_id
     })
   }
 
@@ -78,7 +74,7 @@ impl PlexTvClient {
     if self.token.is_some() {
       token = Some(self.token.as_deref().unwrap().to_string());
     }
-    let headers = create_default_headers(token).unwrap();
+    let headers = create_default_headers(token, self.client_id).unwrap();
     self.client.reset_headers(headers);
   }
 
@@ -138,7 +134,7 @@ impl PlexTvClient {
   pub fn get_auth_url(&self, pin: &CreatePinResponse) -> String {
     format!(
       "{}/auth#?clientID={}&code={}",
-      APP_PLEXTV, CLIENT_ID, pin.code
+      APP_PLEXTV, self.client_id, pin.code
     )
   }
 

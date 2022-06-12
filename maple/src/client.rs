@@ -4,7 +4,7 @@ use anyhow::Result;
 use slint::{self, Weak};
 use tokio::time::Duration;
 
-use crate::{app::AppEvent, errors::ClientError, MainWindow, MenuItemData};
+use crate::{app::AppEvent, errors::ClientError, MainWindow, MenuItemData, constants::CLIENT_ID};
 use common::config;
 use plextvapi::{
   errors::{ApiError::Unauthorized, ApiErrors},
@@ -26,7 +26,7 @@ enum Screen {
 impl Client {
   pub fn new(window: Weak<MainWindow>) -> Result<Self> {
     Ok(Client {
-      plextv: PlexTvClient::new(PLEXTV)?,
+      plextv: PlexTvClient::new(PLEXTV, CLIENT_ID)?,
       window,
       resources: Vec::new(),
     })
