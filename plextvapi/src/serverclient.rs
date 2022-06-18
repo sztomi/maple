@@ -1,6 +1,6 @@
 use crate::{
   apiclient::ApiClient,
-  types::{Connection, Resource},
+  types::{Connection, Resource, MediaProvider, MediaContainerRoot}, RequestError,
 };
 use reqwest::header::{self, HeaderMap, HeaderValue};
 use thiserror::Error;
@@ -17,6 +17,8 @@ pub enum ServerClientError {
   NoConnection,
   #[error("No access token provided for server")]
   NoToken,
+  #[error("An error occured while performing a request")]
+  RequestError(RequestError),
 }
 
 fn create_default_headers(token: &str, client_id: &'static str) -> HeaderMap {
@@ -73,5 +75,13 @@ impl ServerClient {
     }
 
     Err(ServerClientError::NoConnection)
+  }
+
+  pub async fn get_media_providers(&self) -> Result<Vec<MediaProvider>, ServerClientError> {
+    let result = self.client.get::<MediaContainerRoot>("/media/providers", None).await;
+    match result {
+      Ok(root) => Ok(root.media_container.media_provider),
+      Err(err) => Err(ServerClientError::RequestError(err))
+    }
   }
 }

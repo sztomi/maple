@@ -1,21 +1,22 @@
-use std::rc::Rc;
+use std::{rc::Rc, collections::HashMap};
 
 use anyhow::Result;
 use slint::{self, Weak};
 use tokio::time::Duration;
 
-use crate::{app::AppEvent, errors::ClientError, MainWindow, MenuItemData, constants::CLIENT_ID};
+use crate::{app::AppEvent, errors::ClientError, MainWindow, MenuItemData, viewmodel::{Item, ServerItem}, constants::CLIENT_ID};
 use common::config;
 use plextvapi::{
   errors::{ApiError::Unauthorized, ApiErrors},
-  types::{Resource, Service},
-  PlexTvClient, PLEXTV,
+  types::{Resource, Service, MediaProvider},
+  PlexTvClient, PLEXTV, serverclient::ServerClient,
 };
 
 pub struct Client {
   plextv: PlexTvClient,
   window: Weak<MainWindow>,
   resources: Vec<Resource>,
+  menu_items: HashMap<usize, Item>
 }
 
 enum Screen {
@@ -29,6 +30,7 @@ impl Client {
       plextv: PlexTvClient::new(PLEXTV, CLIENT_ID)?,
       window,
       resources: Vec::new(),
+      menu_items: HashMap::new(),
     })
   }
 
@@ -105,6 +107,7 @@ impl Client {
     log::trace!("Getting resources");
     self.resources = self.plextv.get_resources(true, true, true).await?;
     let resources = self.resources.clone();
+    let mut menu_items = HashMap::new();
     self.window.upgrade_in_event_loop(move |window| {
       let mut items = Vec::new();
       for (idx, res) in resources.iter().enumerate() {
@@ -116,6 +119,16 @@ impl Client {
           title: res.name.clone().into(),
           is_sub: false,
         });
+        if let Ok(client) = ServerClient::new(res, CLIENT_ID) {
+          let server = ServerItem::new(res.clone(), client);
+          // TODO(sztomi): must do this outside the closure - likely menu_items should be
+          // filled outside and iterated on in the closure.
+          // let providers = server.client.get_media_providers().await?;
+          menu_items.insert(idx as usize, Item::Server(server));
+        }
+        else {
+          log::warn!("Could not establish connection to server {0}", res.name);
+        }
       }
       let items_model = Rc::new(slint::VecModel::from(items));
       window.set_menu_items(items_model.into());

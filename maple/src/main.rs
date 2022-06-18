@@ -12,6 +12,7 @@ mod app;
 mod client;
 mod errors;
 mod constants;
+mod viewmodel;
 
 use app::AppEvent;
 use client::Client;

@@ -183,7 +183,7 @@ pub struct User {
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub struct Root {
+pub struct MediaContainerRoot {
   #[serde(rename = "MediaContainer")]
   pub media_container: MediaContainer,
 }
@@ -250,7 +250,7 @@ pub struct MediaProvider {
   pub types: String,
   pub protocols: String,
   #[serde(rename = "Feature")]
-  pub feature: Vec<Feature>,
+  pub features: Vec<Feature>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Deserialize)]
